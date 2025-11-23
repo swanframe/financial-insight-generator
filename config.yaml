@@ -1,0 +1,42 @@
+# Configuration for Financial Insight Generator
+
+data:
+  # Path to the input CSV/Excel file with raw transactions
+  input_path: "data/raw/sample_transactions.csv"
+
+  # Optional: specify the date format if your dates are in a known format.
+  # If omitted, the loader will let pandas infer the format.
+  date_format: "%Y-%m-%d"
+  parse_dates: true
+
+columns:
+  # Column mapping: logical field -> column name in your CSV
+
+  # Required fields
+  date: "order_date"
+  amount: "total_price"
+
+  # Optional fields (comment out or delete if not present in your data)
+  cost: "cost"
+  category: "category"
+  product: "product_name"
+  customer_id: "customer_id"
+  channel: "sales_channel"
+
+analytics:
+  # Default analytics options (we'll use these in Phase 5+)
+  time_granularity: "month"        # one of: day, week, month
+  top_n: 5                         # for "top N" categories/products/customers
+  anomaly_lookback_days: 30
+  anomaly_sigma_threshold: 2.0
+
+output:
+  # Control what gets saved to disk (used in later phases)
+  save_clean_data: true
+  clean_data_path: "data/processed/cleaned_transactions.csv"
+
+  save_metrics: true
+  metrics_path: "data/processed/metrics.json"
+
+  save_report: true
+  report_path: "reports/financial_insights.txt"

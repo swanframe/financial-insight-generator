@@ -1,0 +1,36 @@
+order_id,order_date,total_price,cost,category,product_name,customer_id,sales_channel
+1,2024-01-02,120.50,80.00,Electronics,Wireless Headphones,CUST001,Online
+2,2024-01-03,45.00,20.00,Books,Data Science Handbook,CUST002,Online
+3,2024-01-03,89.99,50.00,Home,Blender Pro,CUST003,Store
+4,2024-01-04,250.00,150.00,Electronics,4K Monitor,CUST001,Online
+5,2024-01-05,35.00,18.00,Clothing,Basic T-Shirt,CUST004,Store
+6,2024-01-06,60.00,30.00,Clothing,Jeans Classic,CUST005,Store
+7,2024-01-07,300.00,190.00,Electronics,Gaming Console,CUST006,Online
+8,2024-01-08,22.50,10.00,Books,Python Crash Course,CUST002,Online
+9,2024-01-09,15.00,7.00,Grocery,Organic Coffee Beans,CUST007,Marketplace
+10,2024-01-10,99.99,60.00,Home,Air Fryer,CUST003,Store
+11,2024-01-15,180.00,110.00,Electronics,Noise Cancelling Headphones,CUST008,Online
+12,2024-01-18,55.00,30.00,Clothing,Hoodie Warm,CUST009,Store
+13,2024-01-20,42.00,20.00,Grocery,Weekly Essentials Pack,CUST010,Marketplace
+14,2024-02-01,130.00,85.00,Electronics,Bluetooth Speaker,CUST001,Online
+15,2024-02-02,75.00,40.00,Home,Electric Kettle,CUST011,Store
+16,2024-02-03,49.99,25.00,Books,Machine Learning Guide,CUST002,Online
+17,2024-02-05,210.00,140.00,Electronics,Office Laptop,CUST012,Online
+18,2024-02-07,33.00,16.00,Clothing,Summer Shorts,CUST004,Store
+19,2024-02-09,19.50,9.00,Grocery,Snacks Variety Pack,CUST007,Marketplace
+20,2024-02-11,89.00,50.00,Home,Desk Lamp LED,CUST003,Store
+21,2024-02-15,260.00,170.00,Electronics,Gaming Monitor,CUST006,Online
+22,2024-02-18,39.00,19.00,Books,SQL Basics,CUST002,Online
+23,2024-02-20,58.00,30.00,Clothing,Sneakers Low,CUST005,Store
+24,2024-03-01,145.00,95.00,Electronics,Tablet 10in,CUST013,Online
+25,2024-03-02,65.00,35.00,Home,Vacuum Cleaner Mini,CUST011,Store
+26,2024-03-03,27.50,13.00,Grocery,Breakfast Bundle,CUST010,Marketplace
+27,2024-03-05,52.00,26.00,Clothing,Formal Shirt,CUST004,Store
+28,2024-03-07,199.00,130.00,Electronics,Smartwatch Sport,CUST008,Online
+29,2024-03-09,24.00,12.00,Books,Statistics Essentials,CUST002,Online
+30,2024-03-10,105.00,65.00,Home,Office Chair Basic,CUST003,Store
+31,2024-03-12,18.00,8.00,Grocery,Tea Selection Pack,CUST007,Marketplace
+32,2024-03-15,310.00,200.00,Electronics,High-End GPU,CUST006,Online
+33,2024-03-18,72.00,36.00,Clothing,Running Shoes,CUST005,Store
+34,2024-03-20,55.00,28.00,Books,Deep Learning Primer,CUST002,Online
+35,2024-03-22,95.00,55.00,Home,Smart Thermostat,CUST011,Store
