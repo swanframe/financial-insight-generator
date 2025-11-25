@@ -1,0 +1,87 @@
+app:
+  name: "Financial Insight Generator"
+
+cli:
+  description: "Financial Insight Generator (FIG) CLI"
+  help:
+    config: "Path to configuration YAML file (default: config.yaml)"
+    no_report: "Do not print the full insight report on startup."
+    interactive: "Start interactive chat-like mode after initial analysis."
+    lang: "Language for user-facing output (e.g., 'en' or 'id'). Defaults to ui.language in config.yaml if not provided."
+  banner: "=== Financial Insight Report ==="
+
+report:
+  title: "FINANCIAL INSIGHT REPORT"
+  underline: "========================"
+  section:
+    overview: "1. Overview"
+    segments: "2. Segment Highlights"
+    trend: "3. Trend Analysis"
+    anomaly: "4. Daily Anomaly Check"
+  overview:
+    unknown_period: "an unknown period"
+    heading: "Overview for {date_range}:"
+    total_revenue: "- Total revenue was {total_revenue} across {n_transactions} transactions."
+    avg_order_value: "- The average order value was {avg_order_value}."
+    cost_and_profit: "- Total cost was {total_cost}, resulting in gross profit of {gross_profit}."
+    gross_margin: "- Gross margin was {gross_margin_pct}."
+  segments:
+    no_data_for_segment: "No data available for {segment_name}."
+    top_segment_header: "Top {segment_label}:"
+    item_line: "- {label}: {revenue} across {order_count} orders (approx. {share_str} of revenue)."
+    no_segment_insights: "No segment-level insights available (no segment columns found)."
+  trend:
+    not_enough_data: "There is not enough data to compute a reliable month-over-month trend."
+    heading: "Month-over-month trend ({period_str}):"
+    period_latest_month: "the latest month"
+    period_range: "{previous_period} to {current_period}"
+    revenue_change_line: "- Revenue {direction_word} from {previous_revenue} to {current_revenue}."
+    change_line: "- This represents {change_direction} of {absolute_change} ({percent_change})."
+    direction_word:
+      up: "increased"
+      down: "decreased"
+      flat: "remained roughly flat"
+      changed: "changed"
+    change_direction:
+      increase: "an increase"
+      decrease: "a decrease"
+      no_change: "no change"
+  anomaly:
+    not_enough_history: "There is not enough recent daily history to perform anomaly detection."
+    heading: "Daily anomaly check for {date}:"
+    line_revenue_vs_avg: "- Revenue was {current_revenue} compared to a recent average of {mean} (std dev {std})."
+    line_zscore: "- The z-score for this day is {z_score}."
+    status:
+      high: "- This day appears unusually strong compared to recent history."
+      low: "- This day appears unusually weak compared to recent history."
+      normal: "- This day looks normal relative to recent history."
+
+chat:
+  welcome_1: "Welcome to the Financial Insight Generator (interactive mode)."
+  welcome_2: "Your data has been loaded and analyzed."
+  welcome_3: "Type 'help' to see available commands."
+  prompt: "fig> "
+  exit_goodbye: "Exiting. Goodbye!"
+  exit_goodbye_with_newline: "\nExiting. Goodbye!"
+  help_header: "Available commands:"
+  help:
+    summary: "  summary           - Show overall summary and monthly trend"
+    overview: "  overview          - Same as 'summary'"
+    top_categories: "  top categories    - Show top revenue-driving categories"
+    top_products: "  top products      - Show top products by revenue"
+    top_customers: "  top customers     - Show top customers by revenue"
+    top_channels: "  top channels      - Show revenue by sales channel"
+    trend: "  trend             - Show month-over-month revenue trend"
+    anomaly: "  anomaly           - Show last-day revenue anomaly check"
+    time_series: "  time series       - Show first few rows of revenue time series"
+    help: "  help              - Show this help message"
+    exit: "  exit / quit / q   - Exit the assistant"
+  headings:
+    summary: "[Summary]"
+    trend: "[Trend Analysis]"
+    anomaly: "[Daily Anomaly Check]"
+    time_series: "[Revenue Time Series] (first 10 rows)"
+    top_segments: "[Top {human_name}]"
+  no_segment_info: "No '{human_name}' information is available in this dataset."
+  time_series_not_available: "Time series data is not available."
+  unknown_command: "Sorry, I didn't understand that command. Type 'help' to see available commands."

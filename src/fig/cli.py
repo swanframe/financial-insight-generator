@@ -15,6 +15,7 @@ from .preprocessing import load_and_clean_transactions
 from .analytics import build_metrics_bundle
 from .insights import generate_full_report
 from . import chatbot
+from .i18n import get_translator
 
 
 def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
@@ -31,7 +32,7 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     )
     parser.add_argument(
         "--no-report",
-        action="store_true",  # ✅ correct: this makes it a boolean flag
+        action="store_true",  # boolean flag
         help="Do not print the full insight report on startup.",
     )
     parser.add_argument(
@@ -39,6 +40,15 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
         "--interactive",
         action="store_true",
         help="Start interactive chat-like mode after initial analysis.",
+    )
+    parser.add_argument(
+        "-l",
+        "--lang",
+        type=str,
+        help=(
+            "Language for user-facing output (e.g., 'en' or 'id'). "
+            "Defaults to ui.language in config.yaml if not provided."
+        ),
     )
 
     return parser.parse_args(argv)
@@ -53,13 +63,25 @@ def main(argv: list[str] | None = None) -> None:
     # --- Run the data pipeline ---
     df, pipeline_report, cfg = load_and_clean_transactions(config_path)
 
+    # --- Determine effective language: CLI flag > config > default 'en' ---
+    if hasattr(cfg, "ui"):
+        config_lang = getattr(cfg.ui, "language", "en") or "en"
+    else:
+        config_lang = "en"
+
+    raw_lang = args.lang or config_lang
+    language = str(raw_lang).strip().lower() if raw_lang else "en"
+    t = get_translator(language)
+
     # --- Build metrics bundle ---
     metrics_bundle = build_metrics_bundle(df, cfg)
 
     # --- Print full report unless suppressed ---
     if not args.no_report:
-        print("\n=== Financial Insight Report ===\n")
-        report_text = generate_full_report(metrics_bundle)
+        print()
+        print(t("cli.banner"))
+        print()
+        report_text = generate_full_report(metrics_bundle, language=language)
         print(report_text)
 
     # --- Optionally start interactive mode ---
@@ -68,6 +90,7 @@ def main(argv: list[str] | None = None) -> None:
             "df": df,
             "metrics": metrics_bundle,
             "config": cfg,
+            "language": language,
         }
         chatbot.start_chat_interface(context)
 

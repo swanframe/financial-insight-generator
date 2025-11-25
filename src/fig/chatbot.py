@@ -15,78 +15,94 @@ from typing import Any, Dict
 import pandas as pd
 
 from . import analytics, insights
+from .i18n import get_translator
 
 
-def _print_help() -> None:
+def _print_help(t) -> None:
     """Print available commands."""
-    print("\nAvailable commands:")
-    print("  summary           - Show overall summary and monthly trend")
-    print("  overview          - Same as 'summary'")
-    print("  top categories    - Show top revenue-driving categories")
-    print("  top products      - Show top products by revenue")
-    print("  top customers     - Show top customers by revenue")
-    print("  top channels      - Show revenue by sales channel")
-    print("  trend             - Show month-over-month revenue trend")
-    print("  anomaly           - Show last-day revenue anomaly check")
-    print("  time series       - Show first few rows of revenue time series")
-    print("  help              - Show this help message")
-    print("  exit / quit / q   - Exit the assistant\n")
+    print()
+    print(t("chat.help_header"))
+    print(t("chat.help.summary"))
+    print(t("chat.help.overview"))
+    print(t("chat.help.top_categories"))
+    print(t("chat.help.top_products"))
+    print(t("chat.help.top_customers"))
+    print(t("chat.help.top_channels"))
+    print(t("chat.help.trend"))
+    print(t("chat.help.anomaly"))
+    print(t("chat.help.time_series"))
+    print(t("chat.help.help"))
+    print(t("chat.help.exit"))
+    print()
 
 
-def _handle_summary(metrics: Dict[str, Any]) -> None:
+def _handle_summary(metrics: Dict[str, Any], language: str, t) -> None:
     """Handle 'summary' / 'overview' command."""
     overall = metrics["overall"]
     monthly_trend = metrics["monthly_trend"]
 
-    print("\n[Summary]")
-    print(insights.generate_overall_summary(overall))
     print()
-    print(insights.generate_trend_insights(monthly_trend))
+    print(t("chat.headings.summary"))
+    print(insights.generate_overall_summary(overall, language=language))
+    print()
+    print(insights.generate_trend_insights(monthly_trend, language=language))
     print()
 
 
 def _handle_top_segment(
-    metrics: Dict[str, Any], seg_key: str, human_name: str
+    metrics: Dict[str, Any],
+    seg_key: str,
+    human_name: str,
+    language: str,
+    t,
 ) -> None:
     """Handle 'top X' commands for segments like category, product, etc."""
     segments = metrics.get("segments", {})
     overall = metrics.get("overall", {})
 
     if seg_key not in segments:
-        print(f"\nNo '{human_name}' information is available in this dataset.\n")
+        print()
+        print(t("chat.no_segment_info", human_name=human_name))
+        print()
         return
 
     seg_dict = {seg_key: segments[seg_key]}
-    text = insights.generate_segment_insights(seg_dict, overall)
-    print(f"\n[Top {human_name.title()}]")
+    text = insights.generate_segment_insights(seg_dict, overall, language=language)
+    print()
+    print(t("chat.headings.top_segments", human_name=human_name.title()))
     print(text)
     print()
 
 
-def _handle_trend(metrics: Dict[str, Any]) -> None:
+def _handle_trend(metrics: Dict[str, Any], language: str, t) -> None:
     """Handle 'trend' command."""
     trend = metrics.get("monthly_trend", {})
-    print("\n[Trend Analysis]")
-    print(insights.generate_trend_insights(trend))
+    print()
+    print(t("chat.headings.trend"))
+    print(insights.generate_trend_insights(trend, language=language))
     print()
 
 
-def _handle_anomaly(metrics: Dict[str, Any]) -> None:
+def _handle_anomaly(metrics: Dict[str, Any], language: str, t) -> None:
     """Handle 'anomaly' command."""
     anomaly = metrics.get("anomaly", {})
-    print("\n[Daily Anomaly Check]")
-    print(insights.generate_anomaly_insights(anomaly))
+    print()
+    print(t("chat.headings.anomaly"))
+    print(insights.generate_anomaly_insights(anomaly, language=language))
     print()
 
 
-def _handle_time_series(metrics: Dict[str, Any]) -> None:
+def _handle_time_series(metrics: Dict[str, Any], language: str, t) -> None:
     """Handle 'time series' command."""
     ts = metrics.get("time_series")
     if not isinstance(ts, pd.DataFrame):
-        print("\nTime series data is not available.\n")
+        print()
+        print(t("chat.time_series_not_available"))
+        print()
         return
 
-    print("\n[Revenue Time Series] (first 10 rows)")
+    print()
+    print(t("chat.headings.time_series"))
     print(ts.head(10))
     print()
 
@@ -99,6 +115,7 @@ def start_chat_interface(context: Dict[str, Any]) -> None:
             - "df": cleaned DataFrame
             - "metrics": metrics bundle from analytics.build_metrics_bundle
             - "config": Config object
+            - "language": optional language code for UI (e.g. "en", "id")
     """
     df = context.get("df")
     metrics = context.get("metrics")
@@ -109,15 +126,24 @@ def start_chat_interface(context: Dict[str, Any]) -> None:
             "Chat context must include 'df', 'metrics', and 'config'."
         )
 
-    print("\nWelcome to the Financial Insight Generator (interactive mode).")
-    print("Your data has been loaded and analyzed.")
-    print("Type 'help' to see available commands.\n")
+    raw_lang = context.get("language")
+    if raw_lang is None and hasattr(cfg, "ui"):
+        raw_lang = getattr(cfg.ui, "language", "en")
+
+    language = str(raw_lang).strip().lower() if raw_lang else "en"
+    t = get_translator(language)
+
+    print()
+    print(t("chat.welcome_1"))
+    print(t("chat.welcome_2"))
+    print(t("chat.welcome_3"))
+    print()
 
     while True:
         try:
-            user_input = input("fig> ").strip()
+            user_input = input(t("chat.prompt")).strip()
         except (EOFError, KeyboardInterrupt):
-            print("\nExiting. Goodbye!")
+            print(t("chat.exit_goodbye_with_newline"))
             break
 
         if not user_input:
@@ -126,29 +152,26 @@ def start_chat_interface(context: Dict[str, Any]) -> None:
         cmd = user_input.lower()
 
         if cmd in {"exit", "quit", "q"}:
-            print("Exiting. Goodbye!")
+            print(t("chat.exit_goodbye"))
             break
 
         if cmd in {"help", "h", "?"}:
-            _print_help()
+            _print_help(t)
         elif "summary" in cmd or "overview" in cmd:
-            _handle_summary(metrics)
+            _handle_summary(metrics, language, t)
         elif "top" in cmd and "categor" in cmd:
-            _handle_top_segment(metrics, "category", "categories")
+            _handle_top_segment(metrics, "category", "categories", language, t)
         elif "top" in cmd and "product" in cmd:
-            _handle_top_segment(metrics, "product", "products")
+            _handle_top_segment(metrics, "product", "products", language, t)
         elif "top" in cmd and "customer" in cmd:
-            _handle_top_segment(metrics, "customer_id", "customers")
+            _handle_top_segment(metrics, "customer_id", "customers", language, t)
         elif "top" in cmd and "channel" in cmd:
-            _handle_top_segment(metrics, "channel", "channels")
+            _handle_top_segment(metrics, "channel", "channels", language, t)
         elif "trend" in cmd:
-            _handle_trend(metrics)
+            _handle_trend(metrics, language, t)
         elif "anomaly" in cmd or "alert" in cmd:
-            _handle_anomaly(metrics)
+            _handle_anomaly(metrics, language, t)
         elif "time series" in cmd or "timeseries" in cmd:
-            _handle_time_series(metrics)
+            _handle_time_series(metrics, language, t)
         else:
-            print(
-                "Sorry, I didn't understand that command. "
-                "Type 'help' to see available commands."
-            )
+            print(t("chat.unknown_command"))

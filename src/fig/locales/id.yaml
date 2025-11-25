@@ -1,0 +1,87 @@
+app:
+  name: "Financial Insight Generator"
+
+cli:
+  description: "Financial Insight Generator (FIG) CLI"
+  help:
+    config: "Path ke berkas konfigurasi YAML (default: config.yaml)"
+    no_report: "Jangan cetak laporan insight lengkap saat mulai."
+    interactive: "Mulai mode chat interaktif setelah analisis awal."
+    lang: "Bahasa untuk tampilan (misalnya 'en' atau 'id'). Secara default menggunakan ui.language di config.yaml jika tidak diisi."
+  banner: "=== Laporan Insight Keuangan ==="
+
+report:
+  title: "LAPORAN INSIGHT KEUANGAN"
+  underline: "========================"
+  section:
+    overview: "1. Gambaran Umum"
+    segments: "2. Sorotan Segmen"
+    trend: "3. Analisis Tren"
+    anomaly: "4. Pemeriksaan Anomali Harian"
+  overview:
+    unknown_period: "periode yang tidak diketahui"
+    heading: "Gambaran umum untuk {date_range}:"
+    total_revenue: "- Total pendapatan sebesar {total_revenue} dari {n_transactions} transaksi."
+    avg_order_value: "- Nilai rata-rata pesanan sebesar {avg_order_value}."
+    cost_and_profit: "- Total biaya sebesar {total_cost}, menghasilkan laba kotor sebesar {gross_profit}."
+    gross_margin: "- Margin kotor sebesar {gross_margin_pct}."
+  segments:
+    no_data_for_segment: "Tidak ada data yang tersedia untuk {segment_name}."
+    top_segment_header: "Segmen {segment_label} teratas:"
+    item_line: "- {label}: {revenue} dari {order_count} pesanan (sekitar {share_str} dari pendapatan)."
+    no_segment_insights: "Tidak ada insight tingkat segmen (tidak ada kolom segmen yang ditemukan)."
+  trend:
+    not_enough_data: "Data tidak cukup untuk menghitung tren pendapatan bulan-ke-bulan yang andal."
+    heading: "Tren bulan-ke-bulan ({period_str}):"
+    period_latest_month: "bulan terbaru"
+    period_range: "{previous_period} hingga {current_period}"
+    revenue_change_line: "- Pendapatan {direction_word} dari {previous_revenue} menjadi {current_revenue}."
+    change_line: "- Ini menunjukkan {change_direction} sebesar {absolute_change} ({percent_change})."
+    direction_word:
+      up: "meningkat"
+      down: "menurun"
+      flat: "relatif stabil"
+      changed: "berubah"
+    change_direction:
+      increase: "kenaikan"
+      decrease: "penurunan"
+      no_change: "tidak ada perubahan signifikan"
+  anomaly:
+    not_enough_history: "Riwayat harian terbaru tidak cukup untuk melakukan deteksi anomali."
+    heading: "Pemeriksaan anomali harian untuk {date}:"
+    line_revenue_vs_avg: "- Pendapatan sebesar {current_revenue} dibandingkan rata-rata terbaru {mean} (deviasi standar {std})."
+    line_zscore: "- Skor-z untuk hari ini adalah {z_score}."
+    status:
+      high: "- Hari ini tampak jauh lebih kuat dibandingkan riwayat terbaru."
+      low: "- Hari ini tampak jauh lebih lemah dibandingkan riwayat terbaru."
+      normal: "- Hari ini terlihat normal dibandingkan riwayat terbaru."
+
+chat:
+  welcome_1: "Selamat datang di Financial Insight Generator (mode interaktif)."
+  welcome_2: "Data Anda telah dimuat dan dianalisis."
+  welcome_3: "Ketik 'help' untuk melihat daftar perintah."
+  prompt: "fig> "
+  exit_goodbye: "Keluar. Sampai jumpa!"
+  exit_goodbye_with_newline: "\nKeluar. Sampai jumpa!"
+  help_header: "Perintah yang tersedia:"
+  help:
+    summary: "  summary           - Tampilkan ringkasan umum dan tren bulanan"
+    overview: "  overview          - Sama seperti 'summary'"
+    top_categories: "  top categories    - Tampilkan kategori dengan pendapatan tertinggi"
+    top_products: "  top products      - Tampilkan produk dengan pendapatan tertinggi"
+    top_customers: "  top customers     - Tampilkan pelanggan dengan pendapatan tertinggi"
+    top_channels: "  top channels      - Tampilkan pendapatan per kanal penjualan"
+    trend: "  trend             - Tampilkan tren pendapatan bulan-ke-bulan"
+    anomaly: "  anomaly           - Tampilkan pemeriksaan anomali pendapatan hari terakhir"
+    time_series: "  time series       - Tampilkan beberapa baris pertama deret waktu pendapatan"
+    help: "  help              - Tampilkan pesan bantuan ini"
+    exit: "  exit / quit / q   - Keluar dari asisten"
+  headings:
+    summary: "[Ringkasan]"
+    trend: "[Analisis Tren]"
+    anomaly: "[Pemeriksaan Anomali Harian]"
+    time_series: "[Deret Waktu Pendapatan] (10 baris pertama)"
+    top_segments: "[Top {human_name}]"
+  no_segment_info: "Informasi '{human_name}' tidak tersedia dalam dataset ini."
+  time_series_not_available: "Data deret waktu tidak tersedia."
+  unknown_command: "Maaf, perintah tersebut tidak dikenali. Ketik 'help' untuk melihat daftar perintah."

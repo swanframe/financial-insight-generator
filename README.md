@@ -8,7 +8,7 @@ transaction-level data (CSV/Excel) into:
 - Human-readable insight reports and an interactive CLI “assistant”
 
 Think of it as a small, extensible **junior financial analyst** you can run
-locally today and plug into an LLM or web UI later.
+locally today and later plug into an LLM or web UI.
 
 ---
 
@@ -16,11 +16,19 @@ locally today and plug into an LLM or web UI later.
 
 - [Features](#features)
 - [Architecture Overview](#architecture-overview)
-- [Project Structure](#project-structure)
+- [Directory Layout](#directory-layout)
 - [Installation](#installation)
 - [Configuration (`config.yaml`)](#configuration-configyaml)
 - [Sample Dataset](#sample-dataset)
 - [Usage](#usage)
+  - [1. Run the data pipeline](#1-run-the-data-pipeline)
+  - [2. Run analytics demo](#2-run-analytics-demo)
+  - [3. Generate a full insight report](#3-generate-a-full-insight-report)
+  - [4. Use the CLI + interactive assistant](#4-use-the-cli--interactive-assistant)
+- [Multilingual Support (English + Indonesian)](#multilingual-support-english--indonesian)
+  - [Language selection (config + CLI)](#language-selection-config--cli)
+  - [How translations are implemented](#how-translations-are-implemented)
+  - [Bahasa Indonesia quick guide](#bahasa-indonesia-quick-guide)
 - [Running Tests](#running-tests)
 - [Roadmap & Future Enhancements](#roadmap--future-enhancements)
 - [What This Demonstrates (AI Engineering Skills)](#what-this-demonstrates-ai-engineering-skills)
@@ -32,45 +40,33 @@ locally today and plug into an LLM or web UI later.
 
 ## Features
 
-- **Flexible data ingestion**
-  - CSV support out of the box (Excel via `pandas.read_excel` if needed).
-  - Designed for transaction-level data (one row = one order/transaction).
-  - Configurable column mapping so different schemas map into a common
-    internal model.
-
-- **Data cleaning & validation**
-  - Validates required fields (date, amount).
-  - Checks for invalid dates and non-numeric amounts/costs.
-  - Normalizes dates and numeric fields using `pandas`.
-  - Produces validation + cleaning summaries.
-  - Saves cleaned data to `data/processed/` (path is configurable).
+- **Data ingestion & cleaning**
+  - Load CSV/Excel transaction data.
+  - Validate required columns and types.
+  - Normalize dates, filter invalid rows, and save a cleaned dataset.
 
 - **Analytics & KPIs**
-  - Overall metrics:
-    - Total revenue, total cost, gross profit, gross margin.
-    - Number of transactions, average order value (AOV).
-  - Time-series metrics:
-    - Revenue by day/week/month (configurable).
+  - Overall metrics (revenue, cost, gross profit, gross margin, order counts).
+  - Time series (e.g., revenue by day/month).
   - Segment metrics:
-    - Revenue by category, product, customer, and channel.
-    - Top-N segments by revenue (configurable).
-  - Trend metrics:
-    - Month-over-month revenue trend (last month vs previous).
-  - Anomaly detection:
-    - Last-day revenue anomaly check using a simple z-score vs recent history.
+    - Category
+    - Product
+    - Customer
+    - Channel
+  - Simple trend analysis (month-over-month).
+  - Simple anomaly detection on recent daily revenue.
 
-- **Natural-language insights**
-  - Template-based text generation:
-    - Overview summary.
-    - Segment highlights (top categories/products/customers/channels).
-    - Month-over-month trend explanation.
-    - Daily anomaly summary.
-  - A single `generate_full_report(...)` function assembles a complete report.
+- **Insight generation**
+  - Template-based text report summarizing:
+    - Overview
+    - Segment highlights
+    - Trend analysis
+    - Daily anomaly check
+  - Report is designed so a future LLM could replace or augment it.
 
-- **CLI / chat-like interface**
-  - CLI entrypoint:
-    - Runs the full pipeline: config → data → analytics → insights.
-    - Prints a full text report.
+- **CLI + interactive “chat-like” assistant**
+  - `python -m fig.cli`:
+    - Loads config, runs pipeline, builds metrics, prints a text report.
     - Optional interactive shell with commands like:
       - `summary`
       - `top categories`
@@ -100,82 +96,58 @@ raw CSV/Excel
       ↓
    data_loader       (I/O only)
       ↓
-   validation        (checks required columns, types)
+   validation        (schema + value checks)
       ↓
-  preprocessing      (rename → normalize → clean)
+  preprocessing      (clean/normalize)
       ↓
-    analytics        (pure functions -> metrics & DataFrames)
+   analytics         (metrics, KPIs, segments, trends, anomaly)
       ↓
-    insights         (template-based text)
+   insights          (textual report, i18n-aware)
       ↓
-   cli/chatbot       (terminal UX, commands → insights)
+     cli / chatbot   (CLI entrypoint + interactive assistant)
 ````
-
-A **metrics bundle** (a single Python dict) acts as the contract between
-analytics, insights, and any future LLM/web integrations:
-
-```python
-metrics_bundle = {
-    "overall": {...},
-    "time_series": <DataFrame>,
-    "segments": {
-        "category": <DataFrame>,
-        "product": <DataFrame>,
-        "customer_id": <DataFrame>,
-        "channel": <DataFrame>,
-    },
-    "monthly_trend": {...},
-    "anomaly": {...},
-}
-```
-
-Any consumer (CLI, notebook, API, LLM) can read from this bundle.
 
 ---
 
-## Project Structure
+## Directory Layout
+
+High-level layout (not exhaustive):
 
 ```text
-financial-insight-generator/
-  README.md                      # Project documentation (this file)
-  requirements.txt               # Python dependencies
-  config.yaml                    # Config for input paths, mappings, analytics
-
-  data/
-    raw/
-      sample_transactions.csv    # Synthetic sample dataset
-    processed/
-      cleaned_transactions.csv   # Cleaned output (generated)
-
-  reports/                       # Optional: place for saving reports
-    # (currently report is printed to console; can be saved here later)
-
-  notebooks/
-    exploration.ipynb            # Optional: EDA / experimentation
-
-  src/
-    fig/
-      __init__.py                # Package init
-      config.py                  # YAML loading & typed Config dataclasses
-      data_loader.py             # CSV/Excel loading
-      validation.py              # Basic schema / type checks, validation report
-      preprocessing.py           # Column mapping, normalization, cleaning
-      analytics.py               # KPIs, segments, trends, anomaly detection
-      insights.py                # Natural-language text generation
-      chatbot.py                 # Interactive terminal “assistant”
-      cli.py                     # CLI entrypoint (`python -m fig.cli`)
-
-  tests/
-    __init__.py
-    conftest.py                  # Shared fixtures (config, pipeline, metrics)
-    test_config.py               # Config loading tests
-    test_data_loader.py          # Data loading tests
-    test_analytics.py            # Core analytics tests
-    test_insights.py             # Report generation tests
-
-  run_data_pipeline.py           # Script: run pipeline & print validation/cleaning summary
-  run_analytics_demo.py          # Script: run analytics & print metrics summary
-  run_insights_report.py         # Script: generate full text report
+.
+├── README.md
+├── requirements.txt
+├── config.yaml
+├── data/
+│   ├── raw/
+│   │   └── sample_transactions.csv
+│   └── processed/
+│       └── cleaned_transactions.csv   # generated by pipeline
+├── reports/
+│   └── financial_insights.txt        # generated report (optional)
+├── src/
+│   └── fig/
+│       ├── __init__.py
+│       ├── config.py
+│       ├── data_loader.py
+│       ├── validation.py
+│       ├── preprocessing.py
+│       ├── analytics.py
+│       ├── insights.py
+│       ├── chatbot.py
+│       ├── cli.py
+│       ├── i18n.py
+│       └── locales/
+│           ├── en.yaml
+│           └── id.yaml
+├── tests/
+│   ├── test_config.py
+│   ├── test_data_loader.py
+│   ├── test_analytics.py
+│   └── test_insights.py
+├── run_data_pipeline.py
+├── run_analytics_demo.py
+└── run_insights_report.py
 ```
 
 ---
@@ -184,47 +156,34 @@ financial-insight-generator/
 
 ### Requirements
 
-* Python **3.10+** recommended
-* macOS / Linux (Windows should also work with minor tweaks)
-* No GPU required (pure CPU / pandas / numpy)
+* Python **3.10+** recommended (tested with 3.12).
+* `pip` for dependency management.
 
-### Setup
+### Steps
+
+From the project root:
 
 ```bash
-# Clone your repo (example)
-git clone https://github.com/<your-username>/financial-insight-generator.git
-cd financial-insight-generator
-
-# Create virtual environment
 python3 -m venv .venv
-source .venv/bin/activate
+source .venv/bin/activate  # Windows (PowerShell): .venv\Scripts\Activate.ps1
 
-# Install dependencies
 pip install --upgrade pip
 pip install -r requirements.txt
 ```
 
-Because the package uses a `src/` layout, ensure `src` is on your `PYTHONPATH`
-when running scripts/tests directly:
+Make sure the `src` directory is on `PYTHONPATH` when running scripts directly:
 
 ```bash
 export PYTHONPATH=src
+# Windows (cmd):    set PYTHONPATH=src
+# Windows (PowerShell): $env:PYTHONPATH="src"
 ```
-
-You can put that line in your shell profile if you want it permanent.
 
 ---
 
 ## Configuration (`config.yaml`)
 
-The configuration file controls:
-
-* Input path
-* Column mapping
-* Analytics options
-* Output paths
-
-Example (included by default):
+The main configuration file is `config.yaml`. Key sections:
 
 ```yaml
 data:
@@ -233,11 +192,8 @@ data:
   parse_dates: true
 
 columns:
-  # Required logical fields
   date: "order_date"
   amount: "total_price"
-
-  # Optional fields
   cost: "cost"
   category: "category"
   product: "product_name"
@@ -245,251 +201,353 @@ columns:
   channel: "sales_channel"
 
 analytics:
-  time_granularity: "month"        # "day", "week", or "month"
-  top_n: 5                         # top N segments for categories/products/customers/channels
+  time_granularity: "month"        # day, week, or month
+  top_n: 5
   anomaly_lookback_days: 30
   anomaly_sigma_threshold: 2.0
 
 output:
   save_clean_data: true
   clean_data_path: "data/processed/cleaned_transactions.csv"
-
-  # Reserved for future use (metrics/report saving)
   save_metrics: true
   metrics_path: "data/processed/metrics.json"
-
   save_report: true
   report_path: "reports/financial_insights.txt"
+
+ui:
+  language: "en"  # or "id" for Bahasa Indonesia
 ```
 
-### Column mapping
-
-Your CSV column names are mapped to a fixed internal schema:
-
-* `date` → transaction date (required)
-* `amount` → revenue / total order value (required)
-* `cost` → cost of goods (optional)
-* `category` → product/category label (optional)
-* `product` → product name or ID (optional)
-* `customer_id` → customer identifier (optional)
-* `channel` → sales channel (optional)
-
-Update `config.yaml` so each logical field points to the corresponding column
-name in your data. If a field doesn’t exist in your dataset, remove or comment it.
+* `data`: where to load raw transactions from.
+* `columns`: mapping from logical fields to actual CSV column names.
+* `analytics`: how to compute segments/trends/anomaly.
+* `output`: where to store cleaned data, metrics, and the text report.
+* `ui.language`: default language for user-facing text.
 
 ---
 
 ## Sample Dataset
 
-A synthetic sample dataset is included at:
+The `data/raw/sample_transactions.csv` file is a synthetic dataset useful for:
 
-* `data/raw/sample_transactions.csv`
+* Trying out the pipeline.
+* Demonstrating the analytics and report output.
+* Running tests and examples.
 
-It covers:
-
-* Several months of orders
-* Multiple categories, products, customers, and channels
-* Reasonable prices and costs
-
-This lets you run the full pipeline out of the box.
+You can swap this for your own file by updating `config.yaml → data.input_path` and adjusting `columns`.
 
 ---
 
 ## Usage
 
-Make sure your virtual environment is active and `PYTHONPATH=src`.
+### 1. Run the data pipeline
 
-### 1. Run the data pipeline only
+Runs loading, validation, cleaning, and saves a cleaned CSV.
 
 ```bash
+export PYTHONPATH=src
+
 python run_data_pipeline.py
 ```
 
-This will:
+You should see printed sections:
 
-* Load `config.yaml`
-* Load raw CSV (`data/raw/sample_transactions.csv`)
-* Validate and clean data
-* Print validation + cleaning summaries
-* Save cleaned data to `data/processed/cleaned_transactions.csv`
+* `Validation Report`
+* `Cleaning Summary`
+* `Sample of Cleaned Data`
+
+And a file `data/processed/cleaned_transactions.csv` is written.
+
+---
 
 ### 2. Run analytics demo
 
+Runs the pipeline, computes metrics, and prints summaries.
+
 ```bash
+export PYTHONPATH=src
+
 python run_analytics_demo.py
 ```
 
-This will:
+Prints:
 
-* Run the data pipeline
-* Compute overall metrics, time series, segment metrics, trend, anomaly
-* Print a structured summary to the console
+* Validation + cleaning summary.
+* Overall metrics.
+* Time series (daily/monthly revenue).
+* Top categories.
+* Monthly trend summary.
+* Last-day anomaly check.
+
+---
 
 ### 3. Generate a full insight report
 
+This script runs everything and prints the full text report (Overview, Segments, Trend, Anomaly). It also respects the `ui.language` field in `config.yaml`.
+
 ```bash
+export PYTHONPATH=src
+
 python run_insights_report.py
 ```
 
-This will:
+* With `ui.language: "en"` → report in English.
+* With `ui.language: "id"` → report in Bahasa Indonesia.
 
-* Run the data pipeline
-* Build a `metrics_bundle`
-* Generate a multi-section text report
-* Print it to the console
+Optionally, you can configure `output.report_path` to write the report to a file as well.
 
-(You can easily extend this script to also save the report to
-`config.output.report_path`.)
+---
 
-### 4. Use the CLI / interactive assistant
+### 4. Use the CLI + interactive assistant
 
-The main CLI is provided by `fig.cli`:
+The CLI integrates the whole flow and optionally starts a simple chat-like interface.
 
 ```bash
-# Print full report (non-interactive)
+export PYTHONPATH=src
+
+# Print full report (default language from config)
 python -m fig.cli --config config.yaml
 
-# Print full report and start interactive mode
+# Print full report and then start interactive mode
 python -m fig.cli --config config.yaml --interactive
-
-# Using defaults (config.yaml in project root)
-python -m fig.cli -i
 ```
 
-In interactive mode, you can use commands like:
+Helpful flags:
 
-```text
-fig> help
-fig> summary
-fig> top categories
-fig> top products
-fig> top customers
-fig> top channels
-fig> trend
-fig> anomaly
-fig> time series
-fig> exit
+* `--no-report` – Skip printing the report on startup (go straight to interactive mode).
+* `--interactive` – Start the chat-style assistant.
+* `--lang` / `-l` – Override language without editing config:
+
+  ```bash
+  # Force Indonesian regardless of config.yaml
+  python -m fig.cli --config config.yaml --lang id
+  ```
+
+In interactive mode, you can type:
+
+* `summary`
+* `top categories`
+* `top products`
+* `top customers`
+* `top channels`
+* `trend`
+* `anomaly`
+* `time series`
+* `help`
+* `exit` / `quit` / `q`
+
+---
+
+## Multilingual Support (English + Indonesian)
+
+FIG supports **two languages** for user-facing text:
+
+* English (`en`) – default.
+* Bahasa Indonesia (`id`).
+
+All user-visible strings in:
+
+* The text report (`insights.py`),
+* The CLI banner (`cli.py`),
+* The interactive assistant (`chatbot.py`),
+
+go through a simple i18n layer.
+
+### Language selection (config + CLI)
+
+**1. Config (default)**
+
+`config.yaml`:
+
+```yaml
+ui:
+  language: "en"  # or "id"
 ```
+
+* Set to `"en"` for English output.
+* Set to `"id"` for Indonesian output.
+* If omitted or invalid, `en` is used as a safe default.
+
+**2. CLI flag override**
+
+You can override the config at runtime:
+
+```bash
+# Force English
+python -m fig.cli --config config.yaml --lang en
+
+# Force Indonesian
+python -m fig.cli --config config.yaml --lang id
+```
+
+Priority:
+
+1. CLI `--lang` (highest).
+2. `ui.language` in `config.yaml`.
+3. Default `"en"`.
+
+### How translations are implemented
+
+* Translations live in YAML files under `src/fig/locales`:
+
+  * `en.yaml` – English strings.
+  * `id.yaml` – Indonesian strings.
+
+* There is a small helper module `src/fig/i18n.py` that:
+
+  * Loads and caches YAML per language.
+
+  * Exposes a function:
+
+    ```python
+    from fig.i18n import get_translator
+
+    t = get_translator("id")
+    text = t("report.section.overview")  # -> "1. Gambaran Umum"
+    ```
+
+  * Supports named placeholders, e.g.:
+
+    ```yaml
+    report:
+      overview:
+        total_revenue: "- Total pendapatan sebesar {total_revenue} dari {n_transactions} transaksi."
+    ```
+
+    which is called from Python as:
+
+    ```python
+    t(
+        "report.overview.total_revenue",
+        total_revenue=_fmt_currency(total_revenue),
+        n_transactions=_fmt_number(n_transactions, 0),
+    )
+    ```
+
+* If a key is missing in `id.yaml`, the translator falls back to `en.yaml`.
+  This prevents crashes if new keys are added and not yet translated.
+
+This design is intentionally simple and “portfolio-friendly”: it shows an understanding of i18n patterns without pulling in heavy dependencies.
+
+### Bahasa Indonesia quick guide
+
+#### Instalasi singkat
+
+```bash
+python3 -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt
+export PYTHONPATH=src
+```
+
+#### Menjalankan laporan dalam Bahasa Indonesia
+
+1. Ubah `config.yaml`:
+
+   ```yaml
+   ui:
+     language: "id"
+   ```
+
+2. Jalankan:
+
+   ```bash
+   python run_insights_report.py
+   ```
+
+   atau dengan CLI:
+
+   ```bash
+   python -m fig.cli --config config.yaml --lang id
+   ```
+
+Laporan dan teks di mode interaktif akan tampil dalam Bahasa Indonesia, sementara perhitungan dan angka tetap sama.
 
 ---
 
 ## Running Tests
 
-From the project root, with your venv active:
+Tests live in the `tests/` directory and cover:
+
+* Config loading and validation.
+* Data loading and preprocessing.
+* Core analytics (KPIs, time series, segments).
+* Insight report generation (including English + a smoke test for Indonesian headings).
+
+Run all tests:
 
 ```bash
 export PYTHONPATH=src
 pytest
 ```
 
-The tests cover:
-
-* Config loading and basic validation.
-* Data loading from the sample CSV.
-* Core analytics (overall metrics, segment revenue).
-* Insight generation (full report contains expected sections).
-
 ---
 
 ## Roadmap & Future Enhancements
 
-Planned / easy next steps:
+Some ideas for future iterations:
 
-* **Metrics & report persistence**
+* **LLM Integration**
 
-  * Save `metrics_bundle` to JSON.
-  * Save full text report to `reports/financial_insights.txt` using
-    `config.output.report_path`.
+  * Use the existing `metrics_bundle` as a structured context for an LLM.
+  * Generate richer, conversational insights based on the same metrics.
 
-* **LLM integration**
+* **Web API / UI**
 
-  * Use `metrics_bundle` as a structured context for an LLM (e.g. OpenAI GPT).
-  * Let users ask free-form questions about their data:
+  * Wrap the pipeline + insights in a FastAPI or Flask service.
+  * Build a simple web dashboard to browse metrics and reports.
 
-    * “Why did revenue drop last month?”
-    * “Which customers are growing fastest?”
-  * Keep `insights.py` as a fallback when LLMs are unavailable.
+* **More Languages**
 
-* **Web/API layer**
+  * Add more locale files: `locales/fr.yaml`, `locales/es.yaml`, etc.
+  * Extend tests to cover additional languages.
 
-  * Wrap the pipeline in a FastAPI / Flask service.
-  * Expose endpoints for:
+* **Richer Analytics**
 
-    * Uploading CSVs
-    * Triggering analysis
-    * Fetching metrics and reports as JSON/text
-
-* **Automation / scheduling**
-
-  * Run `run_insights_report.py` daily via cron / CI.
-  * Push reports to Slack, email, or S3.
-
-* **Packaging & Docker**
-
-  * Add `pyproject.toml` for packaging.
-  * Add a simple Dockerfile for containerized deployment.
+  * Cohort analysis, retention, CLV.
+  * More robust anomaly detection models.
 
 ---
 
 ## What This Demonstrates (AI Engineering Skills)
 
-* **Data engineering**
+This project is intentionally structured to highlight:
 
-  * Config-driven ingestion pipeline.
-  * Schema normalization and validation.
-  * Clean separation between raw and processed data.
+* **Clean separation of concerns**
 
-* **Analytics & ML engineering patterns**
+  * Data loading, validation, preprocessing, analytics, insights, and UX are modular.
+* **Production-minded design**
 
-  * Pure, testable analytics functions (`analytics.py`).
-  * Basic anomaly detection using statistics (z-score).
-  * Segmentation and trend analysis via `pandas`.
+  * Configuration-driven behavior (`config.yaml`).
+  * Clear tests and small helper scripts.
+* **Multilingual UX**
 
-* **AI system design**
+  * Simple but realistic i18n implementation (YAML locales + translation helper).
+  * Config + CLI override for language selection.
+* **LLM-readiness**
 
-  * Clear boundary between:
-
-    * Data layer (loading & preprocessing),
-    * Analytics layer (metrics),
-    * Insight layer (natural-language generation),
-    * Interface layer (CLI/chat).
-  * Metrics bundle designed as a structured “contract” that an LLM or
-    other consumers could use later.
-
-* **Production-minded Python project structure**
-
-  * `src/` layout, tests, and config-based behavior.
-  * Ready to be extended with packaging, Docker, or deployment scripts.
-
-> **Note:** This project is intended as an educational / analytics tool.
-> It is not financial advice and should not be used as the sole basis for
-> real-world financial decisions.
+  * `metrics_bundle` is a compact, structured representation ideal for LLM prompts.
 
 ---
 
 ## Tech Stack
 
-* **Language**: Python 3.10+
-* **Data / analytics**: `pandas`, `numpy`
-* **Config**: `pyyaml`
-* **Testing**: `pytest`
-* **Interface**: Standard Python CLI (no external frameworks)
+* Python 3.10+
+* pandas, numpy
+* PyYAML
+* pytest
+
+No heavy frameworks; everything is intentionally lightweight and transparent.
 
 ---
 
 ## License
 
-This project is licensed under the **MIT License**.
-You can modify, distribute, and use it in commercial or non-commercial projects, subject to the usual MIT conditions.
+You can adapt this project to your own needs.
+(If you plan to open-source it, you can drop in a standard license here, e.g. MIT.)
 
 ---
 
 ## Contact
 
-If you have questions, suggestions, or want to discuss the project:
-
-* GitHub: [@your-username](https://github.com/your-username)
-* Email: [your.email@example.com](mailto:your.email@example.com)
-* LinkedIn: [https://www.linkedin.com/in/your-profile/](https://www.linkedin.com/in/your-profile/)
-
-Happy analyzing 🚀
+If you have feedback or ideas, feel free to reach out or open an issue in the repository that contains this project.

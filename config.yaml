@@ -40,3 +40,8 @@ output:
 
   save_report: true
   report_path: "reports/financial_insights.txt"
+
+ui:
+  # Language for user-facing output (CLI, reports, etc.)
+  # Supported in this phase: "en" (English, default), "id" (Bahasa Indonesia)
+  language: "en"

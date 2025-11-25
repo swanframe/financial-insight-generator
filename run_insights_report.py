@@ -9,7 +9,15 @@ def main() -> None:
     df, report, cfg = load_and_clean_transactions("config.yaml")
 
     metrics_bundle = build_metrics_bundle(df, cfg)
-    report_text = generate_full_report(metrics_bundle)
+
+    # Determine language from config if available
+    language = "en"
+    if hasattr(cfg, "ui"):
+        ui_language = getattr(cfg.ui, "language", "en")
+        if ui_language:
+            language = str(ui_language).strip().lower()
+
+    report_text = generate_full_report(metrics_bundle, language=language)
 
     print(report_text)
 

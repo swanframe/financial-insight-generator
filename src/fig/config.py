@@ -52,6 +52,16 @@ class OutputConfig:
 
 
 @dataclass
+class UiConfig:
+    """UI-related configuration (language, etc.)."""
+
+    # Language code for user-facing output:
+    # - "en" = English (default)
+    # - "id" = Bahasa Indonesia
+    language: str = "en"
+
+
+@dataclass
 class Config:
     """Top-level configuration object used throughout the package."""
 
@@ -60,6 +70,7 @@ class Config:
     columns: ColumnsConfig
     analytics: AnalyticsConfig
     output: OutputConfig
+    ui: UiConfig
 
 
 def load_config(path: str | Path = "config.yaml") -> Config:
@@ -142,7 +153,9 @@ def load_config(path: str | Path = "config.yaml") -> Config:
     output_cfg = OutputConfig(
         save_clean_data=bool(output_raw.get("save_clean_data", True)),
         clean_data_path=Path(
-            output_raw.get("clean_data_path", "data/processed/cleaned_transactions.csv")
+            output_raw.get(
+                "clean_data_path", "data/processed/cleaned_transactions.csv"
+            )
         ),
         save_metrics=bool(output_raw.get("save_metrics", True)),
         metrics_path=Path(
@@ -154,10 +167,18 @@ def load_config(path: str | Path = "config.yaml") -> Config:
         ),
     )
 
+    # --- UI section (optional with defaults) ---
+    ui_raw = raw_cfg.get("ui", {})
+    ui_language_raw = ui_raw.get("language", "en")
+    # Normalize to lower-case string, defaulting to "en"
+    ui_language = str(ui_language_raw).strip().lower() if ui_language_raw else "en"
+    ui_cfg = UiConfig(language=ui_language)
+
     return Config(
         raw=raw_cfg,
         data=data_cfg,
         columns=columns_cfg,
         analytics=analytics_cfg,
         output=output_cfg,
+        ui=ui_cfg,
     )
