@@ -2,7 +2,7 @@
 
 This module provides a simple entry point to:
 - Run the end-to-end pipeline (config -> data -> analytics -> insights)
-- Print a full financial insight report
+- Print a full financial insight report (template-based or LLM-based)
 - Optionally start an interactive chat-like loop
 """
 
@@ -10,15 +10,17 @@ from __future__ import annotations
 
 import argparse
 from pathlib import Path
+from typing import List, Optional
 
 from .preprocessing import load_and_clean_transactions
 from .analytics import build_metrics_bundle
 from .insights import generate_full_report
+from .llm_insights import generate_llm_report
 from . import chatbot
 from .i18n import get_translator
 
 
-def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
+def parse_args(argv: Optional[List[str]] = None) -> argparse.Namespace:
     """Parse command-line arguments."""
     parser = argparse.ArgumentParser(
         description="Financial Insight Generator (FIG) CLI",
@@ -50,11 +52,21 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
             "Defaults to ui.language in config.yaml if not provided."
         ),
     )
+    parser.add_argument(
+        "--report-mode",
+        choices=["template", "llm", "hybrid"],
+        help=(
+            "Override llm.mode from config.yaml for this run. "
+            "Use 'template' for the original template-based report, "
+            "'llm' for an LLM-generated narrative, or 'hybrid' to let "
+            "the LLM refine the template report."
+        ),
+    )
 
     return parser.parse_args(argv)
 
 
-def main(argv: list[str] | None = None) -> None:
+def main(argv: Optional[List[str]] = None) -> None:
     """Entry point for the CLI."""
     args = parse_args(argv)
 
@@ -76,12 +88,29 @@ def main(argv: list[str] | None = None) -> None:
     # --- Build metrics bundle ---
     metrics_bundle = build_metrics_bundle(df, cfg)
 
+    # --- Determine effective report mode: CLI override > config.llm.mode ---
+    if hasattr(cfg, "llm"):
+        cfg_mode = getattr(cfg.llm, "mode", "template") or "template"
+    else:
+        cfg_mode = "template"
+    report_mode = args.report_mode or cfg_mode
+    if report_mode not in {"template", "llm", "hybrid"}:
+        report_mode = "template"
+
     # --- Print full report unless suppressed ---
     if not args.no_report:
         print()
         print(t("cli.banner"))
         print()
-        report_text = generate_full_report(metrics_bundle, language=language)
+        if report_mode == "template":
+            report_text = generate_full_report(metrics_bundle, language=language)
+        else:
+            report_text = generate_llm_report(
+                metrics_bundle,
+                cfg,
+                language=language,
+                mode_override=report_mode,
+            )
         print(report_text)
 
     # --- Optionally start interactive mode ---

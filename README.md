@@ -1,11 +1,16 @@
 # Financial Insight Generator (FIG)
 
+![Python 3.12+](https://img.shields.io/badge/python-3.12+-blue.svg)
+![Interface](https://img.shields.io/badge/interface-CLI-green.svg)
+![LLM](https://img.shields.io/badge/LLM-optional-orange.svg)
+
 Financial Insight Generator (FIG) is a modular Python toolkit that turns raw
 transaction-level data (CSV/Excel) into:
 
 - Clean, validated datasets  
 - Useful financial KPIs and segments  
-- Human-readable insight reports and an interactive CLI “assistant”
+- Human-readable insight reports  
+- An interactive CLI “assistant”, now optionally powered by an LLM
 
 Think of it as a small, extensible **junior financial analyst** you can run
 locally today and later plug into an LLM or web UI.
@@ -15,26 +20,29 @@ locally today and later plug into an LLM or web UI.
 ## Table of Contents
 
 - [Features](#features)
+- [Tech Stack](#tech-stack)
 - [Architecture Overview](#architecture-overview)
 - [Directory Layout](#directory-layout)
 - [Installation](#installation)
-- [Configuration (`config.yaml`)](#configuration-configyaml)
-- [Sample Dataset](#sample-dataset)
+- [Configuration](#configuration)
+  - [Data](#data)
+  - [Columns](#columns)
+  - [Analytics](#analytics)
+  - [Output](#output)
+  - [UI & Language](#ui--language)
+  - [LLM](#llm)
 - [Usage](#usage)
-  - [1. Run the data pipeline](#1-run-the-data-pipeline)
-  - [2. Run analytics demo](#2-run-analytics-demo)
-  - [3. Generate a full insight report](#3-generate-a-full-insight-report)
-  - [4. Use the CLI + interactive assistant](#4-use-the-cli--interactive-assistant)
-- [Multilingual Support (English + Indonesian)](#multilingual-support-english--indonesian)
-  - [Language selection (config + CLI)](#language-selection-config--cli)
-  - [How translations are implemented](#how-translations-are-implemented)
-  - [Bahasa Indonesia quick guide](#bahasa-indonesia-quick-guide)
-- [Running Tests](#running-tests)
-- [Roadmap & Future Enhancements](#roadmap--future-enhancements)
-- [What This Demonstrates (AI Engineering Skills)](#what-this-demonstrates-ai-engineering-skills)
-- [Tech Stack](#tech-stack)
+  - [One-off report script](#one-off-report-script)
+  - [CLI](#cli)
+  - [LLM report modes](#llm-report-modes)
+  - [Interactive assistant (chat)](#interactive-assistant-chat)
+  - [Multilingual usage (EN / ID)](#multilingual-usage-en--id)
+- [Quickstart](#quickstart)
+- [Testing](#testing)
+- [AI Engineering Highlights](#ai-engineering-highlights)
+- [Next Steps](#next-steps)
 - [License](#license)
-- [Contact](#contact)
+- [Author](#author)
 
 ---
 
@@ -46,284 +54,324 @@ locally today and later plug into an LLM or web UI.
   - Normalize dates, filter invalid rows, and save a cleaned dataset.
 
 - **Analytics & KPIs**
-  - Overall metrics (revenue, cost, gross profit, gross margin, order counts).
-  - Time series (e.g., revenue by day/month).
+  - Overall metrics:
+    - Revenue, cost, gross profit, gross margin.
+    - Number of transactions, average order value (AOV).
+    - Date range of the dataset.
+  - Time series (e.g., revenue by month).
   - Segment metrics:
     - Category
     - Product
     - Customer
     - Channel
-  - Simple trend analysis (month-over-month).
-  - Simple anomaly detection on recent daily revenue.
+  - Trend analysis and a simple anomaly check on recent revenue.
 
-- **Insight generation**
-  - Template-based text report summarizing:
-    - Overview
-    - Segment highlights
-    - Trend analysis
-    - Daily anomaly check
-  - Report is designed so a future LLM could replace or augment it.
+- **Insight reports**
+  - Template-based, deterministic report generation.
+  - Optional **LLM-based narrative reports** that use the analytics output as structured context.
+  - Three modes: `template`, `llm`, `hybrid`.
 
-- **CLI + interactive “chat-like” assistant**
-  - `python -m fig.cli`:
-    - Loads config, runs pipeline, builds metrics, prints a text report.
-    - Optional interactive shell with commands like:
-      - `summary`
-      - `top categories`
-      - `top products`
-      - `top customers`
-      - `top channels`
-      - `trend`
-      - `anomaly`
-      - `time series`
+- **Interactive assistant (CLI)**
+  - Rule-based commands for:
+    - Summary / overview
+    - Top categories / products / customers / channels
+    - Trend and anomaly
+    - Time series
+  - **LLM-powered free-form questions** about the data when enabled.
 
-- **Clean, extensible architecture**
-  - `src/fig` package with clear layers:
-    - `config` → `data_loader` → `validation` → `preprocessing`
-      → `analytics` → `insights` → `cli` / `chatbot`.
-  - Easy to extend:
-    - Add new KPIs or segment analyses in `analytics.py`.
-    - Swap or augment template-based insights with LLMs later.
+- **Multilingual UX**
+  - English and Bahasa Indonesia support.
+  - The same language setting is respected across reports and chat.
+  - LLM prompts are explicitly instructed to answer in the selected language.
+
+---
+
+## Tech Stack
+
+- **Language:** Python 3.12
+- **Core libraries:** `pandas`, `numpy`
+- **CLI & tooling:** standard library (`argparse`, `pathlib`)
+- **Testing:** `pytest`
+- **LLM integration (optional):** `openai` Python SDK (or other providers via `fig.llm_client`)
+- **i18n:** simple YAML-based localization (`locales/en.yaml`, `locales/id.yaml`)
 
 ---
 
 ## Architecture Overview
 
-The core flow:
+At a high level:
 
-```text
-raw CSV/Excel
-      ↓
-   data_loader       (I/O only)
-      ↓
-   validation        (schema + value checks)
-      ↓
-  preprocessing      (clean/normalize)
-      ↓
-   analytics         (metrics, KPIs, segments, trends, anomaly)
-      ↓
-   insights          (textual report, i18n-aware)
-      ↓
-     cli / chatbot   (CLI entrypoint + interactive assistant)
-````
+1. **Configuration** (`config.yaml` + `fig.config`)
+2. **Data pipeline**
+   - `fig.data_loader` (load CSV/Excel)
+   - `fig.validation` (validate shapes/types)
+   - `fig.preprocessing` (clean/normalize and optionally save cleaned CSV)
+3. **Analytics** (`fig.analytics`)
+   - Computes KPI dictionaries and DataFrames.
+   - Main output is a **`metrics_bundle`**:
+     ```python
+     metrics_bundle = {
+         "overall": {...},          # overall KPIs
+         "time_series": df,         # revenue over time
+         "segments": {...},         # category / product / customer / channel
+         "monthly_trend": {...},    # MoM trend summary
+         "anomaly": {...},          # recent anomaly info
+     }
+     ```
+4. **Insight generation**
+   - Template-based (`fig.insights.generate_full_report`).
+   - LLM-based (`fig.llm_insights.generate_llm_report`) using:
+     - Structured context from `metrics_bundle`
+     - Prompts from `fig.llm_prompts`
+     - Provider-agnostic calls via `fig.llm_client`
+5. **CLI / Chat**
+   - `fig.cli` for running the pipeline + report + interactive mode.
+   - `fig.chatbot` for rule-based commands.
+   - `fig.llm_chatbot` for free-form Q&A on top of the metrics.
+
+Everything is wired so that **LLM features are optional**: when disabled, FIG acts as a traditional analytics + reporting tool.
 
 ---
 
 ## Directory Layout
 
-High-level layout (not exhaustive):
+Key files:
 
 ```text
 .
-├── README.md
-├── requirements.txt
-├── config.yaml
-├── data/
-│   ├── raw/
-│   │   └── sample_transactions.csv
-│   └── processed/
-│       └── cleaned_transactions.csv   # generated by pipeline
-├── reports/
-│   └── financial_insights.txt        # generated report (optional)
+├── config.yaml                 # Main configuration file
+├── run_insights_report.py      # One-off report script (CLI)
 ├── src/
 │   └── fig/
-│       ├── __init__.py
-│       ├── config.py
-│       ├── data_loader.py
-│       ├── validation.py
-│       ├── preprocessing.py
-│       ├── analytics.py
-│       ├── insights.py
-│       ├── chatbot.py
-│       ├── cli.py
-│       ├── i18n.py
+│       ├── config.py           # Config dataclasses + loader
+│       ├── data_loader.py      # CSV/Excel loading
+│       ├── validation.py       # Validation of raw transactions
+│       ├── preprocessing.py    # Cleaning & normalization
+│       ├── analytics.py        # Core metrics and metrics_bundle
+│       ├── insights.py         # Template-based reports
+│       ├── llm_client.py       # Provider-agnostic LLM client
+│       ├── llm_prompts.py      # Prompt + context builders
+│       ├── llm_insights.py     # LLM-based report generation
+│       ├── chatbot.py          # Rule-based CLI assistant
+│       ├── llm_chatbot.py      # LLM-powered free-form chat helper
+│       ├── i18n.py             # Simple i18n wrapper
 │       └── locales/
-│           ├── en.yaml
-│           └── id.yaml
-├── tests/
-│   ├── test_config.py
-│   ├── test_data_loader.py
-│   ├── test_analytics.py
-│   └── test_insights.py
-├── run_data_pipeline.py
-├── run_analytics_demo.py
-└── run_insights_report.py
-```
+│           ├── en.yaml         # English strings
+│           └── id.yaml         # Indonesian strings
+└── tests/
+    └── ...                     # Unit tests (analytics, config, LLM, etc.)
+````
 
 ---
 
 ## Installation
 
-### Requirements
+1. **Clone the repo** and create a virtual environment.
 
-* Python **3.10+** recommended (tested with 3.12).
-* `pip` for dependency management.
-
-### Steps
-
-From the project root:
+2. Install dependencies:
 
 ```bash
-python3 -m venv .venv
-source .venv/bin/activate  # Windows (PowerShell): .venv\Scripts\Activate.ps1
-
-pip install --upgrade pip
 pip install -r requirements.txt
 ```
 
-Make sure the `src` directory is on `PYTHONPATH` when running scripts directly:
+3. (Optional, for LLM features) Install a provider SDK. For OpenAI:
 
 ```bash
-export PYTHONPATH=src
-# Windows (cmd):    set PYTHONPATH=src
-# Windows (PowerShell): $env:PYTHONPATH="src"
+pip install "openai>=1.0.0"
 ```
+
+4. The default `config.yaml` points to a sample CSV. Adjust paths as needed.
 
 ---
 
-## Configuration (`config.yaml`)
+## Configuration
 
-The main configuration file is `config.yaml`. Key sections:
+All configuration lives in `config.yaml` and is loaded via `fig.config.load_config`.
+
+### Data
 
 ```yaml
 data:
   input_path: "data/raw/sample_transactions.csv"
-  date_format: "%Y-%m-%d"
+  date_format: "%Y-%m-%d"  # optional; let pandas infer if omitted
   parse_dates: true
+```
 
+### Columns
+
+Logical → physical column mapping:
+
+```yaml
 columns:
-  date: "order_date"
-  amount: "total_price"
-  cost: "cost"
-  category: "category"
-  product: "product_name"
+  date: "order_date"       # required
+  amount: "total_price"    # required
+  cost: "cost"             # optional
+  category: "category"     # optional
+  product: "product_name"  # optional
   customer_id: "customer_id"
   channel: "sales_channel"
+```
 
+### Analytics
+
+```yaml
 analytics:
-  time_granularity: "month"        # day, week, or month
+  time_granularity: "month"       # "day", "week", or "month"
   top_n: 5
   anomaly_lookback_days: 30
   anomaly_sigma_threshold: 2.0
+```
 
+### Output
+
+```yaml
 output:
   save_clean_data: true
   clean_data_path: "data/processed/cleaned_transactions.csv"
+
   save_metrics: true
   metrics_path: "data/processed/metrics.json"
+
   save_report: true
   report_path: "reports/financial_insights.txt"
-
-ui:
-  language: "en"  # or "id" for Bahasa Indonesia
 ```
 
-* `data`: where to load raw transactions from.
-* `columns`: mapping from logical fields to actual CSV column names.
-* `analytics`: how to compute segments/trends/anomaly.
-* `output`: where to store cleaned data, metrics, and the text report.
-* `ui.language`: default language for user-facing text.
+### UI & Language
 
----
+```yaml
+ui:
+  language: "en"   # or "id" for Bahasa Indonesia
+```
 
-## Sample Dataset
+This language is used for:
 
-The `data/raw/sample_transactions.csv` file is a synthetic dataset useful for:
+* Template-based reports
+* CLI banners and messages
+* Chatbot prompts and responses
+* LLM prompts (the model is explicitly told which language to answer in)
 
-* Trying out the pipeline.
-* Demonstrating the analytics and report output.
-* Running tests and examples.
+You can also override it via CLI with `--lang`.
 
-You can swap this for your own file by updating `config.yaml → data.input_path` and adjusting `columns`.
+### LLM
+
+The LLM section is **optional**. If omitted, FIG runs in pure template mode with `llm.enabled = false`.
+
+Example configuration:
+
+```yaml
+llm:
+  enabled: false          # master toggle; false = no LLM calls
+
+  provider: "openai"      # logical provider name
+  model: "gpt-4.1-mini"   # model name for your provider
+
+  temperature: 0.3
+  max_tokens: 800
+
+  api_key_env_var: "OPENAI_API_KEY"
+  timeout_seconds: 30
+
+  # Report / assistant mode:
+  # - "template": built-in templates only
+  # - "llm":      LLM-only narrative reports
+  # - "hybrid":   template report + LLM refinement
+  mode: "template"
+
+  # Max characters of structured context passed into prompts
+  max_context_chars: 12000
+```
+
+> ⚠️ **Never put API keys in `config.yaml`.**
+> Use environment variables instead:
+>
+> ```bash
+> export OPENAI_API_KEY="sk-...your-key-here..."
+> ```
 
 ---
 
 ## Usage
 
-### 1. Run the data pipeline
+### One-off report script
 
-Runs loading, validation, cleaning, and saves a cleaned CSV.
-
-```bash
-export PYTHONPATH=src
-
-python run_data_pipeline.py
-```
-
-You should see printed sections:
-
-* `Validation Report`
-* `Cleaning Summary`
-* `Sample of Cleaned Data`
-
-And a file `data/processed/cleaned_transactions.csv` is written.
-
----
-
-### 2. Run analytics demo
-
-Runs the pipeline, computes metrics, and prints summaries.
+Run the full pipeline + report generation:
 
 ```bash
-export PYTHONPATH=src
-
-python run_analytics_demo.py
-```
-
-Prints:
-
-* Validation + cleaning summary.
-* Overall metrics.
-* Time series (daily/monthly revenue).
-* Top categories.
-* Monthly trend summary.
-* Last-day anomaly check.
-
----
-
-### 3. Generate a full insight report
-
-This script runs everything and prints the full text report (Overview, Segments, Trend, Anomaly). It also respects the `ui.language` field in `config.yaml`.
-
-```bash
-export PYTHONPATH=src
-
 python run_insights_report.py
 ```
 
-* With `ui.language: "en"` → report in English.
-* With `ui.language: "id"` → report in Bahasa Indonesia.
-
-Optionally, you can configure `output.report_path` to write the report to a file as well.
-
----
-
-### 4. Use the CLI + interactive assistant
-
-The CLI integrates the whole flow and optionally starts a simple chat-like interface.
+Options:
 
 ```bash
-export PYTHONPATH=src
+python run_insights_report.py \
+  --config config.yaml \
+  --lang en \
+  --report-mode template   # or llm / hybrid
+```
 
-# Print full report (default language from config)
+* `--lang` overrides `ui.language` from config.
+* `--report-mode` overrides `llm.mode` for this run.
+
+### CLI
+
+The CLI provides the same report plus optional interactive mode:
+
+```bash
 python -m fig.cli --config config.yaml
+```
 
-# Print full report and then start interactive mode
+Flags:
+
+```bash
+python -m fig.cli \
+  --config config.yaml \
+  --lang en \
+  --report-mode template \
+  --interactive
+```
+
+* If `--interactive` is passed, the chat interface starts after the report.
+
+### LLM report modes
+
+The effective report mode is:
+
+> CLI `--report-mode` (if provided) → `llm.mode` in config.yaml → `"template"`
+
+* `template`
+  Uses the original deterministic `generate_full_report(metrics_bundle, language)`.
+  **No LLM calls** are made, even if `llm.enabled: true`.
+
+* `llm`
+  Uses `generate_llm_report(..., mode_override="llm")`:
+
+  * Summarizes `metrics_bundle` into a compact, structured context.
+  * Builds an LLM prompt via `fig.llm_prompts`.
+  * Calls the provider via `fig.llm_client.generate_text`.
+
+* `hybrid`
+  Similar to `llm`, but the existing template-based report is passed into the prompt as a “draft” that the model can refine and expand—while still being constrained by the data.
+
+If the LLM is disabled or misconfigured (missing key, unknown provider, etc.):
+
+* The code **never crashes the pipeline**.
+* A short note is added at the top:
+
+  * EN:
+    `"[Note] The LLM-based report could not be generated... Falling back to the template-based report."`
+  * ID:
+    `"[Catatan] Laporan LLM tidak dapat dibuat... Sistem kembali ke laporan berbasis template."`
+* The underlying template-based report is still printed.
+
+### Interactive assistant (chat)
+
+Start the interactive assistant:
+
+```bash
 python -m fig.cli --config config.yaml --interactive
 ```
 
-Helpful flags:
-
-* `--no-report` – Skip printing the report on startup (go straight to interactive mode).
-* `--interactive` – Start the chat-style assistant.
-* `--lang` / `-l` – Override language without editing config:
-
-  ```bash
-  # Force Indonesian regardless of config.yaml
-  python -m fig.cli --config config.yaml --lang id
-  ```
-
-In interactive mode, you can type:
+You can then type commands like:
 
 * `summary`
 * `top categories`
@@ -334,220 +382,188 @@ In interactive mode, you can type:
 * `anomaly`
 * `time series`
 * `help`
-* `exit` / `quit` / `q`
+* `exit`
+
+These are handled by the **rule-based** logic in `fig.chatbot` and will behave the same whether or not the LLM is enabled.
+
+#### Free-form questions (LLM-enhanced)
+
+If `llm.enabled: true`, any input that does **not** match a known command is treated as a free-form question and routed through `fig.llm_chatbot`, for example:
+
+* `Is there anything unusual about recent sales?`
+* `Why did revenue increase in March?`
+* `Which customers are driving most of the profit?`
+
+Under the hood:
+
+1. `metrics_bundle` is summarized via `fig.llm_prompts.summarize_metrics_bundle`.
+2. A chat-style system prompt is built with `build_system_prompt_for_chat(language)`.
+3. A user prompt is built with `build_user_prompt_for_question(...)`, including:
+
+   * The structured metrics summary.
+   * A short description of available CLI commands.
+   * The user’s question.
+4. `fig.llm_client.generate_text` calls the LLM.
+
+The model is instructed to:
+
+* Use **only** the metrics provided.
+* Avoid inventing transactions, dates, or customers.
+* Explain limitations honestly if the data does not support a detailed answer.
+
+On configuration/provider errors (e.g., missing key, network issue), the assistant responds with a friendly note instead of crashing and suggests using the rule-based commands.
+
+### Multilingual usage (EN / ID)
+
+The effective language is:
+
+> CLI `--lang` → `ui.language` in config.yaml → `"en"`
+
+Examples:
+
+* English report and chat:
+
+  ```bash
+  python -m fig.cli --config config.yaml --lang en
+  ```
+
+* Indonesian report and chat:
+
+  ```bash
+  python -m fig.cli --config config.yaml --lang id
+  ```
+
+For Indonesian:
+
+* Template reports use translated headings and phrases from `locales/id.yaml`.
+* Chat messages (`help`, `welcome`, `unknown_command`, etc.) are in Bahasa Indonesia.
+* LLM system/user prompts explicitly ask the model to respond in Bahasa Indonesia.
 
 ---
 
-## Multilingual Support (English + Indonesian)
+## Quickstart
 
-FIG supports **two languages** for user-facing text:
-
-* English (`en`) – default.
-* Bahasa Indonesia (`id`).
-
-All user-visible strings in:
-
-* The text report (`insights.py`),
-* The CLI banner (`cli.py`),
-* The interactive assistant (`chatbot.py`),
-
-go through a simple i18n layer.
-
-### Language selection (config + CLI)
-
-**1. Config (default)**
-
-`config.yaml`:
-
-```yaml
-ui:
-  language: "en"  # or "id"
-```
-
-* Set to `"en"` for English output.
-* Set to `"id"` for Indonesian output.
-* If omitted or invalid, `en` is used as a safe default.
-
-**2. CLI flag override**
-
-You can override the config at runtime:
+Fast path for trying the project locally:
 
 ```bash
-# Force English
-python -m fig.cli --config config.yaml --lang en
+# 1) Create and activate a virtualenv (example)
+python -m venv .venv
+source .venv/bin/activate   # on Windows: .venv\Scripts\activate
 
-# Force Indonesian
-python -m fig.cli --config config.yaml --lang id
-```
-
-Priority:
-
-1. CLI `--lang` (highest).
-2. `ui.language` in `config.yaml`.
-3. Default `"en"`.
-
-### How translations are implemented
-
-* Translations live in YAML files under `src/fig/locales`:
-
-  * `en.yaml` – English strings.
-  * `id.yaml` – Indonesian strings.
-
-* There is a small helper module `src/fig/i18n.py` that:
-
-  * Loads and caches YAML per language.
-
-  * Exposes a function:
-
-    ```python
-    from fig.i18n import get_translator
-
-    t = get_translator("id")
-    text = t("report.section.overview")  # -> "1. Gambaran Umum"
-    ```
-
-  * Supports named placeholders, e.g.:
-
-    ```yaml
-    report:
-      overview:
-        total_revenue: "- Total pendapatan sebesar {total_revenue} dari {n_transactions} transaksi."
-    ```
-
-    which is called from Python as:
-
-    ```python
-    t(
-        "report.overview.total_revenue",
-        total_revenue=_fmt_currency(total_revenue),
-        n_transactions=_fmt_number(n_transactions, 0),
-    )
-    ```
-
-* If a key is missing in `id.yaml`, the translator falls back to `en.yaml`.
-  This prevents crashes if new keys are added and not yet translated.
-
-This design is intentionally simple and “portfolio-friendly”: it shows an understanding of i18n patterns without pulling in heavy dependencies.
-
-### Bahasa Indonesia quick guide
-
-#### Instalasi singkat
-
-```bash
-python3 -m venv .venv
-source .venv/bin/activate
+# 2) Install dependencies
 pip install -r requirements.txt
-export PYTHONPATH=src
+
+# 3) Run a one-off template-based report
+python run_insights_report.py
+
+# 4) Start the interactive assistant (template mode)
+python -m fig.cli --config config.yaml --interactive
 ```
 
-#### Menjalankan laporan dalam Bahasa Indonesia
+Enable LLM features (optional):
 
-1. Ubah `config.yaml`:
+```bash
+# 5) Set your API key (example for OpenAI)
+export OPENAI_API_KEY="sk-...your-key-here..."
 
-   ```yaml
-   ui:
-     language: "id"
-   ```
+# 6) In config.yaml:
+# llm:
+#   enabled: true
+#   provider: "openai"
+#   model: "gpt-4.1-mini"
+#   ...
 
-2. Jalankan:
-
-   ```bash
-   python run_insights_report.py
-   ```
-
-   atau dengan CLI:
-
-   ```bash
-   python -m fig.cli --config config.yaml --lang id
-   ```
-
-Laporan dan teks di mode interaktif akan tampil dalam Bahasa Indonesia, sementara perhitungan dan angka tetap sama.
+# 7) Run with LLM-powered reports and chat
+python -m fig.cli --config config.yaml --interactive --report-mode llm
+```
 
 ---
 
-## Running Tests
+## Testing
 
-Tests live in the `tests/` directory and cover:
-
-* Config loading and validation.
-* Data loading and preprocessing.
-* Core analytics (KPIs, time series, segments).
-* Insight report generation (including English + a smoke test for Indonesian headings).
-
-Run all tests:
+Run the full test suite:
 
 ```bash
-export PYTHONPATH=src
 pytest
 ```
 
----
+The tests cover:
 
-## Roadmap & Future Enhancements
+* Data & analytics core.
+* Configuration loading (with and without `llm` section, invalid modes, etc.).
+* Prompt builders (`fig.llm_prompts`).
+* LLM client configuration behavior (`fig.llm_client`), including:
 
-Some ideas for future iterations:
+  * Missing API keys.
+  * Unsupported providers.
+* LLM report wrapper (`fig.llm_insights`):
 
-* **LLM Integration**
+  * Disabled LLM fallback.
+  * Template mode skipping LLM calls.
+  * Hybrid mode error fallback.
+* LLM chat helper (`fig.llm_chatbot`), with mocked LLM responses.
 
-  * Use the existing `metrics_bundle` as a structured context for an LLM.
-  * Generate richer, conversational insights based on the same metrics.
-
-* **Web API / UI**
-
-  * Wrap the pipeline + insights in a FastAPI or Flask service.
-  * Build a simple web dashboard to browse metrics and reports.
-
-* **More Languages**
-
-  * Add more locale files: `locales/fr.yaml`, `locales/es.yaml`, etc.
-  * Extend tests to cover additional languages.
-
-* **Richer Analytics**
-
-  * Cohort analysis, retention, CLV.
-  * More robust anomaly detection models.
+All LLM-related tests run **fully offline**: they mock the client and never hit external APIs.
 
 ---
 
-## What This Demonstrates (AI Engineering Skills)
+## AI Engineering Highlights
 
-This project is intentionally structured to highlight:
+This repo is designed to demonstrate **AI Engineer** skills:
 
-* **Clean separation of concerns**
+* **LLM-ready architecture**
 
-  * Data loading, validation, preprocessing, analytics, insights, and UX are modular.
-* **Production-minded design**
+  * Clear separation between data pipeline, analytics, and language generation.
+  * `metrics_bundle` as a structured context that can be reused across UIs / backends.
 
-  * Configuration-driven behavior (`config.yaml`).
-  * Clear tests and small helper scripts.
+* **Provider-agnostic LLM client**
+
+  * `fig.llm_client` takes a `Config` object and hides provider details.
+  * Swapping providers is mostly a matter of extending this single module and adjusting `config.yaml`.
+
+* **Prompt & context design**
+
+  * Prompts explicitly constrain the model to the known metrics and guard against hallucinations.
+  * Context truncation (`max_context_chars`) keeps prompts bounded and predictable.
+
 * **Multilingual UX**
 
-  * Simple but realistic i18n implementation (YAML locales + translation helper).
-  * Config + CLI override for language selection.
-* **LLM-readiness**
+  * Shared language selection logic for CLI, reports, and LLM prompts.
+  * Explicit system instructions for English and Bahasa Indonesia.
 
-  * `metrics_bundle` is a compact, structured representation ideal for LLM prompts.
+* **Testability & reliability**
+
+  * LLM usage is easy to mock and test.
+  * Misconfiguration or provider errors never break the core pipeline; the system always falls back to a safe, deterministic path.
 
 ---
 
-## Tech Stack
+## Next Steps
 
-* Python 3.10+
-* pandas, numpy
-* PyYAML
-* pytest
+If you want to extend FIG further, natural follow-ups include:
 
-No heavy frameworks; everything is intentionally lightweight and transparent.
+* Exposing the analytics + LLM layer as a **FastAPI** or **Django** web service.
+* Adding a simple **React dashboard** that calls an API endpoint for:
+
+  * Metrics & charts.
+  * LLM-generated summaries.
+  * Chat about your data.
+* Adding support for more LLM providers by extending `fig.llm_client`.
+
+The core pieces—structured analytics, i18n-aware prompts, and provider-agnostic LLM integration—are already in place.
 
 ---
 
 ## License
 
-You can adapt this project to your own needs.
-(If you plan to open-source it, you can drop in a standard license here, e.g. MIT.)
+This project is released under the **MIT License**.
+See the `LICENSE` file for details.
 
 ---
 
-## Contact
+## Author
 
-If you have feedback or ideas, feel free to reach out or open an issue in the repository that contains this project.
+**Rahman**
+
+* GitHub: [https://github.com/swanframe](https://github.com/swanframe)
+* LinkedIn: [https://www.linkedin.com/in/rahman-080902337](https://www.linkedin.com/in/rahman-080902337)

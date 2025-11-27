@@ -45,3 +45,36 @@ ui:
   # Language for user-facing output (CLI, reports, etc.)
   # Supported in this phase: "en" (English, default), "id" (Bahasa Indonesia)
   language: "en"
+
+llm:
+  # Global toggle for LLM features. When false, FIG behaves as a pure, template-based tool.
+  enabled: true
+
+  # Logical provider name; used by fig.llm_client to decide which SDK / HTTP client to call.
+  # Examples: "openai", "gemini", "deepseek", "custom".
+  provider: "openai"
+
+  # Default model name for the chosen provider.
+  # For OpenAI, examples include: "gpt-4.1-mini", "gpt-4o-mini", etc.
+  model: "gpt-4.1-mini"
+
+  # Sampling parameters. You can tweak these per project.
+  temperature: 0.3
+  max_tokens: 800
+
+  # Name of the environment variable that stores your API key.
+  # Do NOT commit the key itself; just set this env var locally.
+  api_key_env_var: "OPENAI_API_KEY"
+
+  # Network safety limits (seconds).
+  timeout_seconds: 30
+
+  # Report/assistant behavior mode:
+  # - "template"  -> use only the built-in template-based generator (no LLM calls)
+  # - "llm"       -> use only the LLM-based generator
+  # - "hybrid"    -> use the template output as context for the LLM
+  mode: "template"
+
+  # Safety limit for how much structured context we send into prompts
+  # (metrics bundle, samples of the cleaned DataFrame, etc.).
+  max_context_chars: 12000

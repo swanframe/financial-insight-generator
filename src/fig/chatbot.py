@@ -14,7 +14,7 @@ from typing import Any, Dict
 
 import pandas as pd
 
-from . import analytics, insights
+from . import analytics, insights, llm_chatbot
 from .i18n import get_translator
 
 
@@ -174,4 +174,19 @@ def start_chat_interface(context: Dict[str, Any]) -> None:
         elif "time series" in cmd or "timeseries" in cmd:
             _handle_time_series(metrics, language, t)
         else:
-            print(t("chat.unknown_command"))
+            # Unknown command: if LLM chat is enabled, try answering as a free-form question.
+            if hasattr(cfg, "llm") and getattr(cfg.llm, "enabled", False):
+                answer = llm_chatbot.answer_freeform_question(
+                    user_input,
+                    {
+                        "df": df,
+                        "metrics": metrics,
+                        "config": cfg,
+                        "language": language,
+                    },
+                )
+                print()
+                print(answer)
+                print()
+            else:
+                print(t("chat.unknown_command"))
