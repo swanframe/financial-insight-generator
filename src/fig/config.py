@@ -5,8 +5,10 @@ This module is responsible for:
 - Validating required keys (data paths, column mappings, etc.)
 - Exposing a Config object used by other modules
 
-It now also includes a small LLM configuration section so that the rest of
-the project can be "LLM-aware" without hard-coding any provider details.
+It also includes configuration sections for:
+- LLM integration (provider-agnostic)
+- Embeddings (shared across vector/RAG components)
+- Vector store (local-first, provider-agnostic)
 """
 
 from __future__ import annotations
@@ -135,6 +137,41 @@ class LlmConfig:
 
 
 @dataclass
+class EmbeddingsConfig:
+    """Configuration for text embeddings.
+
+    This section is shared by vector stores / RAG-style components. When the
+    `embeddings` section is omitted from config.yaml, defaults are derived
+    from the LLM configuration (same provider and API key env var).
+    """
+
+    provider: str = "openai"
+    model: str = "text-embedding-3-small"
+    api_key_env_var: str = "OPENAI_API_KEY"
+    timeout_seconds: int = 30
+
+
+@dataclass
+class VectorStoreConfig:
+    """Configuration for the vector database / index."""
+
+    # Master toggle for all vector-store features.
+    enabled: bool = False
+
+    # Vector DB backend identifier, e.g. "chroma", "in_memory".
+    provider: str = "chroma"
+
+    # Persistence path for local-first vector stores such as Chroma.
+    persist_path: Path = Path("data/vector_store")
+
+    # Logical collection / index name.
+    collection_name: str = "fig_transactions"
+
+    # Default number of neighbours to retrieve when querying.
+    default_top_k: int = 5
+
+
+@dataclass
 class Config:
     """Top-level configuration object passed around the application."""
 
@@ -147,6 +184,8 @@ class Config:
     output: OutputConfig
     ui: UiConfig
     llm: LlmConfig
+    embeddings: EmbeddingsConfig
+    vector_store: VectorStoreConfig
 
 
 # ---------------------------------------------------------------------------
@@ -177,16 +216,15 @@ def load_config(path: str | Path = "config.yaml") -> Config:
 
     # --- Data section (optional with defaults) ---
     data_raw = raw_cfg.get("data", {}) or {}
+    data_defaults = DataConfig()
     data_cfg = DataConfig(
-        input_path=Path(data_raw.get("input_path", DataConfig().input_path)),
-        date_format=data_raw.get("date_format", DataConfig().date_format),
-        parse_dates=bool(data_raw.get("parse_dates", DataConfig().parse_dates)),
+        input_path=Path(data_raw.get("input_path", data_defaults.input_path)),
+        date_format=data_raw.get("date_format", data_defaults.date_format),
+        parse_dates=bool(data_raw.get("parse_dates", data_defaults.parse_dates)),
     )
 
-    # --- Columns section (required fields + optional extras) ---
+    # --- Columns section (required) ---
     columns_raw = raw_cfg.get("columns", {}) or {}
-    # We treat `date` and `amount` as required keys; this will raise a KeyError
-    # with a clear message if they are missing.
     try:
         date_col = columns_raw["date"]
         amount_col = columns_raw["amount"]
@@ -208,52 +246,103 @@ def load_config(path: str | Path = "config.yaml") -> Config:
 
     # --- Analytics section (optional with defaults) ---
     analytics_raw = raw_cfg.get("analytics", {}) or {}
+    analytics_defaults = AnalyticsConfig()
     analytics_cfg = AnalyticsConfig(
-        time_granularity=str(analytics_raw.get("time_granularity", AnalyticsConfig().time_granularity)),
-        top_n=int(analytics_raw.get("top_n", AnalyticsConfig().top_n)),
+        time_granularity=str(
+            analytics_raw.get("time_granularity", analytics_defaults.time_granularity)
+        ),
+        top_n=int(analytics_raw.get("top_n", analytics_defaults.top_n)),
         anomaly_lookback_days=int(
-            analytics_raw.get("anomaly_lookback_days", AnalyticsConfig().anomaly_lookback_days)
+            analytics_raw.get("anomaly_lookback_days", analytics_defaults.anomaly_lookback_days)
         ),
         anomaly_sigma_threshold=float(
-            analytics_raw.get("anomaly_sigma_threshold", AnalyticsConfig().anomaly_sigma_threshold)
+            analytics_raw.get(
+                "anomaly_sigma_threshold",
+                analytics_defaults.anomaly_sigma_threshold,
+            )
         ),
     )
 
     # --- Output section (optional with defaults) ---
     output_raw = raw_cfg.get("output", {}) or {}
+    output_defaults = OutputConfig()
     output_cfg = OutputConfig(
-        save_clean_data=bool(output_raw.get("save_clean_data", OutputConfig().save_clean_data)),
-        clean_data_path=Path(output_raw.get("clean_data_path", OutputConfig().clean_data_path)),
-        save_metrics=bool(output_raw.get("save_metrics", OutputConfig().save_metrics)),
-        metrics_path=Path(output_raw.get("metrics_path", OutputConfig().metrics_path)),
-        save_report=bool(output_raw.get("save_report", OutputConfig().save_report)),
-        report_path=Path(output_raw.get("report_path", OutputConfig().report_path)),
+        save_clean_data=bool(output_raw.get("save_clean_data", output_defaults.save_clean_data)),
+        clean_data_path=Path(output_raw.get("clean_data_path", output_defaults.clean_data_path)),
+        save_metrics=bool(output_raw.get("save_metrics", output_defaults.save_metrics)),
+        metrics_path=Path(output_raw.get("metrics_path", output_defaults.metrics_path)),
+        save_report=bool(output_raw.get("save_report", output_defaults.save_report)),
+        report_path=Path(output_raw.get("report_path", output_defaults.report_path)),
     )
 
     # --- UI section (optional with defaults) ---
     ui_raw = raw_cfg.get("ui", {}) or {}
-    ui_language_raw = ui_raw.get("language", UiConfig().language)
+    ui_defaults = UiConfig()
+    ui_language_raw = ui_raw.get("language", ui_defaults.language)
     # Normalize to lower-case string, defaulting to "en".
-    ui_language = str(ui_language_raw).strip().lower() if ui_language_raw else UiConfig().language
+    ui_language = (
+        str(ui_language_raw).strip().lower() if ui_language_raw else ui_defaults.language
+    )
     ui_cfg = UiConfig(language=ui_language)
 
     # --- LLM section (optional with defaults) ---
     llm_raw = raw_cfg.get("llm", {}) or {}
+    llm_defaults = LlmConfig()
     llm_cfg = LlmConfig(
-        enabled=bool(llm_raw.get("enabled", LlmConfig().enabled)),
-        provider=str(llm_raw.get("provider", LlmConfig().provider)),
-        model=str(llm_raw.get("model", LlmConfig().model)),
-        temperature=float(llm_raw.get("temperature", LlmConfig().temperature)),
-        max_tokens=int(llm_raw.get("max_tokens", LlmConfig().max_tokens)),
-        api_key_env_var=str(llm_raw.get("api_key_env_var", LlmConfig().api_key_env_var)),
-        timeout_seconds=int(llm_raw.get("timeout_seconds", LlmConfig().timeout_seconds)),
-        mode=str(llm_raw.get("mode", LlmConfig().mode)),
-        max_context_chars=int(llm_raw.get("max_context_chars", LlmConfig().max_context_chars)),
+        enabled=bool(llm_raw.get("enabled", llm_defaults.enabled)),
+        provider=str(llm_raw.get("provider", llm_defaults.provider)),
+        model=str(llm_raw.get("model", llm_defaults.model)),
+        temperature=float(llm_raw.get("temperature", llm_defaults.temperature)),
+        max_tokens=int(llm_raw.get("max_tokens", llm_defaults.max_tokens)),
+        api_key_env_var=str(llm_raw.get("api_key_env_var", llm_defaults.api_key_env_var)),
+        timeout_seconds=int(
+            llm_raw.get("timeout_seconds", llm_defaults.timeout_seconds)
+        ),
+        mode=str(llm_raw.get("mode", llm_defaults.mode)),
+        max_context_chars=int(
+            llm_raw.get("max_context_chars", llm_defaults.max_context_chars)
+        ),
     )
 
-    # Normalise mode to a known value ("template", "llm", "hybrid").
+    # Normalise LLM mode to a known value ("template", "llm", "hybrid").
     if llm_cfg.mode not in {"template", "llm", "hybrid"}:
         llm_cfg.mode = "template"
+
+    # --- Embeddings section (optional with defaults derived from LLM) ---
+    embeddings_raw = raw_cfg.get("embeddings", {}) or {}
+    embeddings_defaults = EmbeddingsConfig()
+    # Derive provider / key defaults from the LLM config when not explicitly set.
+    derived_provider = llm_cfg.provider or embeddings_defaults.provider
+    derived_api_key_env_var = (
+        llm_cfg.api_key_env_var or embeddings_defaults.api_key_env_var
+    )
+    derived_timeout = llm_cfg.timeout_seconds or embeddings_defaults.timeout_seconds
+
+    embeddings_cfg = EmbeddingsConfig(
+        provider=str(embeddings_raw.get("provider", derived_provider)),
+        model=str(embeddings_raw.get("model", embeddings_defaults.model)),
+        api_key_env_var=str(
+            embeddings_raw.get("api_key_env_var", derived_api_key_env_var)
+        ),
+        timeout_seconds=int(
+            embeddings_raw.get("timeout_seconds", derived_timeout)
+        ),
+    )
+
+    # --- Vector store section (optional with defaults) ---
+    vector_raw = raw_cfg.get("vector_store", {}) or {}
+    vector_defaults = VectorStoreConfig()
+    vector_cfg = VectorStoreConfig(
+        enabled=bool(vector_raw.get("enabled", vector_defaults.enabled)),
+        provider=str(vector_raw.get("provider", vector_defaults.provider)),
+        persist_path=Path(vector_raw.get("persist_path", vector_defaults.persist_path)),
+        collection_name=str(
+            vector_raw.get("collection_name", vector_defaults.collection_name)
+        ),
+        default_top_k=int(
+            vector_raw.get("default_top_k", vector_defaults.default_top_k)
+        ),
+    )
 
     return Config(
         raw=raw_cfg,
@@ -263,4 +352,6 @@ def load_config(path: str | Path = "config.yaml") -> Config:
         output=output_cfg,
         ui=ui_cfg,
         llm=llm_cfg,
+        embeddings=embeddings_cfg,
+        vector_store=vector_cfg,
     )

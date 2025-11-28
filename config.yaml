@@ -16,7 +16,7 @@ columns:
   date: "order_date"
   amount: "total_price"
 
-  # Optional fields (comment out or delete if not present in your data)
+  # Optional fields (set to null if not available)
   cost: "cost"
   category: "category"
   product: "product_name"
@@ -24,14 +24,18 @@ columns:
   channel: "sales_channel"
 
 analytics:
-  # Default analytics options (we'll use these in Phase 5+)
-  time_granularity: "month"        # one of: day, week, month
-  top_n: 5                         # for "top N" categories/products/customers
+  # Granularity for time-based metrics: "day", "week", or "month"
+  time_granularity: "month"
+
+  # "Top N" size for categories/products/customers
+  top_n: 5
+
+  # Simple anomaly detection settings
   anomaly_lookback_days: 30
   anomaly_sigma_threshold: 2.0
 
 output:
-  # Control what gets saved to disk (used in later phases)
+  # Control what gets saved to disk
   save_clean_data: true
   clean_data_path: "data/processed/cleaned_transactions.csv"
 
@@ -43,7 +47,7 @@ output:
 
 ui:
   # Language for user-facing output (CLI, reports, etc.)
-  # Supported in this phase: "en" (English, default), "id" (Bahasa Indonesia)
+  # Supported values: "en" (English), "id" (Bahasa Indonesia)
   language: "en"
 
 llm:
@@ -55,14 +59,13 @@ llm:
   provider: "openai"
 
   # Default model name for the chosen provider.
-  # For OpenAI, examples include: "gpt-4.1-mini", "gpt-4o-mini", etc.
   model: "gpt-4.1-mini"
 
-  # Sampling parameters. You can tweak these per project.
+  # Sampling / generation parameters.
   temperature: 0.3
   max_tokens: 800
 
-  # Name of the environment variable that stores your API key.
+  # Name of the environment variable that holds your LLM API key.
   # Do NOT commit the key itself; just set this env var locally.
   api_key_env_var: "OPENAI_API_KEY"
 
@@ -70,11 +73,37 @@ llm:
   timeout_seconds: 30
 
   # Report/assistant behavior mode:
-  # - "template"  -> use only the built-in template-based generator (no LLM calls)
-  # - "llm"       -> use only the LLM-based generator
-  # - "hybrid"    -> use the template output as context for the LLM
+  # - "template" -> use only the built-in template-based generator (no LLM calls)
+  # - "llm"      -> use only the LLM-based generator
+  # - "hybrid"   -> use the template output as context for the LLM
   mode: "template"
 
   # Safety limit for how much structured context we send into prompts
   # (metrics bundle, samples of the cleaned DataFrame, etc.).
   max_context_chars: 12000
+
+embeddings:
+  # Embeddings configuration is provider-agnostic and can be shared by
+  # vector stores, RAG pipelines, etc.
+  #
+  # If this section is omitted, FIG derives sensible defaults from the llm
+  # configuration (same provider and API key env var).
+  provider: "dummy"
+  model: "ignored-for-dummy"
+  api_key_env_var: "IGNORED_FOR_DUMMY"
+  timeout_seconds: 30
+
+vector_store:
+  # Master toggle for vector features. When false, FIG ignores any vector indexing
+  # or search commands and behaves exactly like a non-RAG tool.
+  enabled: true
+
+  # Vector DB backend. Later you can add other providers like "qdrant", "pinecone", etc.
+  provider: "chroma"          # "chroma" (persistent) or "in_memory"
+
+  # Where to store the Chroma database on disk (local-first).
+  persist_path: "data/vector_store"
+  collection_name: "fig_transactions"
+
+  # Default number of similar items to retrieve when no explicit top_k is given.
+  default_top_k: 5
