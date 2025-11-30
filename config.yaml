@@ -76,7 +76,7 @@ llm:
   # - "template" -> use only the built-in template-based generator (no LLM calls)
   # - "llm"      -> use only the LLM-based generator
   # - "hybrid"   -> use the template output as context for the LLM
-  mode: "template"
+  mode: "llm"
 
   # Safety limit for how much structured context we send into prompts
   # (metrics bundle, samples of the cleaned DataFrame, etc.).
