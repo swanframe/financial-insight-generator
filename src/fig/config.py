@@ -20,11 +20,6 @@ from typing import Any, Dict
 import yaml
 
 
-# ---------------------------------------------------------------------------
-# Dataclasses representing each config section
-# ---------------------------------------------------------------------------
-
-
 @dataclass
 class DataConfig:
     """Configuration for the raw input data."""
@@ -109,10 +104,10 @@ class LlmConfig:
     # Global toggle for all LLM-powered features.
     enabled: bool = False
 
-    # Logical provider name (e.g. "openai", "gemini", "deepseek", "custom").
+    # Logical provider identifier, e.g. "openai", "gemini", "deepseek", "custom".
     provider: str = "openai"
 
-    # Default model name for the chosen provider.
+    # Default LLM model name for the configured provider.
     model: str = "gpt-4.1-mini"
 
     # Sampling / generation parameters.
@@ -172,6 +167,18 @@ class VectorStoreConfig:
 
 
 @dataclass
+class OrchestrationConfig:
+    """Configuration for high-level orchestration / engine selection.
+
+    Controls whether FIG uses the native Python pipeline or LangChain-based
+    chains built with LangChain.
+    """
+
+    # Orchestration engine name: "native" or "langchain".
+    engine: str = "native"
+
+
+@dataclass
 class Config:
     """Top-level configuration object passed around the application."""
 
@@ -183,6 +190,7 @@ class Config:
     analytics: AnalyticsConfig
     output: OutputConfig
     ui: UiConfig
+    orchestration: OrchestrationConfig
     llm: LlmConfig
     embeddings: EmbeddingsConfig
     vector_store: VectorStoreConfig
@@ -199,9 +207,11 @@ def _load_yaml(path: Path) -> Dict[str, Any]:
     Returns an empty dict if the file is empty.
     """
     with path.open("r", encoding="utf-8") as f:
-        content = yaml.safe_load(f) or {}
+        content = yaml.safe_load(f)  # type: ignore[no-untyped-call]
+    if content is None:
+        return {}
     if not isinstance(content, dict):
-        raise ValueError(f"Configuration file {path} must contain a YAML mapping at the top level.")
+        raise ValueError(f"Config file {path} must contain a YAML mapping/object.")
     return content
 
 
@@ -223,25 +233,17 @@ def load_config(path: str | Path = "config.yaml") -> Config:
         parse_dates=bool(data_raw.get("parse_dates", data_defaults.parse_dates)),
     )
 
-    # --- Columns section (required) ---
+    # --- Columns section (optional with defaults) ---
     columns_raw = raw_cfg.get("columns", {}) or {}
-    try:
-        date_col = columns_raw["date"]
-        amount_col = columns_raw["amount"]
-    except KeyError as exc:
-        raise KeyError(
-            "Missing required column mapping in config.yaml under 'columns'. "
-            "Expected at least 'date' and 'amount'."
-        ) from exc
-
+    columns_defaults = ColumnsConfig()
     columns_cfg = ColumnsConfig(
-        date=str(date_col),
-        amount=str(amount_col),
-        cost=columns_raw.get("cost"),
-        category=columns_raw.get("category"),
-        product=columns_raw.get("product"),
-        customer_id=columns_raw.get("customer_id"),
-        channel=columns_raw.get("channel"),
+        date=columns_raw.get("date", columns_defaults.date),
+        amount=columns_raw.get("amount", columns_defaults.amount),
+        cost=columns_raw.get("cost", columns_defaults.cost),
+        category=columns_raw.get("category", columns_defaults.category),
+        product=columns_raw.get("product", columns_defaults.product),
+        customer_id=columns_raw.get("customer_id", columns_defaults.customer_id),
+        channel=columns_raw.get("channel", columns_defaults.channel),
     )
 
     # --- Analytics section (optional with defaults) ---
@@ -253,7 +255,10 @@ def load_config(path: str | Path = "config.yaml") -> Config:
         ),
         top_n=int(analytics_raw.get("top_n", analytics_defaults.top_n)),
         anomaly_lookback_days=int(
-            analytics_raw.get("anomaly_lookback_days", analytics_defaults.anomaly_lookback_days)
+            analytics_raw.get(
+                "anomaly_lookback_days",
+                analytics_defaults.anomaly_lookback_days,
+            )
         ),
         anomaly_sigma_threshold=float(
             analytics_raw.get(
@@ -278,11 +283,7 @@ def load_config(path: str | Path = "config.yaml") -> Config:
     # --- UI section (optional with defaults) ---
     ui_raw = raw_cfg.get("ui", {}) or {}
     ui_defaults = UiConfig()
-    ui_language_raw = ui_raw.get("language", ui_defaults.language)
-    # Normalize to lower-case string, defaulting to "en".
-    ui_language = (
-        str(ui_language_raw).strip().lower() if ui_language_raw else ui_defaults.language
-    )
+    ui_language = str(ui_raw.get("language", ui_defaults.language))
     ui_cfg = UiConfig(language=ui_language)
 
     # --- LLM section (optional with defaults) ---
@@ -344,6 +345,17 @@ def load_config(path: str | Path = "config.yaml") -> Config:
         ),
     )
 
+    # --- Orchestration section (optional with defaults) ---
+    orchestration_raw = raw_cfg.get("orchestration", {}) or {}
+    orchestration_defaults = OrchestrationConfig()
+    orchestration_cfg = OrchestrationConfig(
+        engine=str(orchestration_raw.get("engine", orchestration_defaults.engine)),
+    )
+
+    # Normalise orchestration engine to a known value ("native", "langchain").
+    if orchestration_cfg.engine not in {"native", "langchain"}:
+        orchestration_cfg.engine = "native"
+
     return Config(
         raw=raw_cfg,
         data=data_cfg,
@@ -351,6 +363,7 @@ def load_config(path: str | Path = "config.yaml") -> Config:
         analytics=analytics_cfg,
         output=output_cfg,
         ui=ui_cfg,
+        orchestration=orchestration_cfg,
         llm=llm_cfg,
         embeddings=embeddings_cfg,
         vector_store=vector_cfg,

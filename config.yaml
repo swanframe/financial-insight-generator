@@ -66,7 +66,7 @@ llm:
   max_tokens: 800
 
   # Name of the environment variable that holds your LLM API key.
-  # Do NOT commit the key itself; just set this env var locally.
+  # Example: "OPENAI_API_KEY"
   api_key_env_var: "OPENAI_API_KEY"
 
   # Network safety limits (seconds).
@@ -107,3 +107,9 @@ vector_store:
 
   # Default number of similar items to retrieve when no explicit top_k is given.
   default_top_k: 5
+
+orchestration:
+  # High-level orchestration / engine selection for LLM/RAG flows.
+  # - "native": use FIG's built-in Python pipeline.
+  # - "langchain": use LangChain-based chains defined in src/fig/langchain_*.py.
+  engine: "langchain"

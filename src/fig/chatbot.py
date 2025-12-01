@@ -1,192 +1,148 @@
 """Simple chat-like interface for Financial Insight Generator.
 
-This module provides an interactive loop in the terminal that allows users to
-request summaries, top categories, trends, anomaly checks, etc.
+This module implements a small REPL on top of the analytics / insights layer.
+It supports a mix of:
 
-It is intentionally lightweight and rule-based:
-- No heavy NLP, just keyword/command matching.
-- Designed so a richer interface (or LLM-based parser) could be plugged in later.
+- Rule-based commands (e.g. "/summary", "/trend").
+- Free-form questions answered by an LLM (optionally with RAG).
+
+The actual LLM answering logic lives in:
+
+- fig.llm_chatbot (native / non-LangChain path).
+- fig.langchain_chains.answer_question_with_langchain (LangChain path).
 """
 
 from __future__ import annotations
 
 from typing import Any, Dict
 
-import pandas as pd
-
-from . import analytics, insights, llm_chatbot
-from .i18n import get_translator
+from . import llm_chatbot
+from .langchain_chains import answer_question_with_langchain
 
 
-def _print_help(t) -> None:
-    """Print available commands."""
+def _print_banner() -> None:
+    print("------------------------------------------------------------")
+    print("Interactive assistant – ask questions about your data.")
+    print("Type '/help' for commands, '/quit' to exit.")
+    print("------------------------------------------------------------")
+
+
+def _print_help() -> None:
     print()
-    print(t("chat.help_header"))
-    print(t("chat.help.summary"))
-    print(t("chat.help.overview"))
-    print(t("chat.help.top_categories"))
-    print(t("chat.help.top_products"))
-    print(t("chat.help.top_customers"))
-    print(t("chat.help.top_channels"))
-    print(t("chat.help.trend"))
-    print(t("chat.help.anomaly"))
-    print(t("chat.help.time_series"))
-    print(t("chat.help.help"))
-    print(t("chat.help.exit"))
+    print("Available commands:")
+    print("  /summary       - Show a high-level summary of key metrics.")
+    print("  /trend         - Describe recent revenue trends.")
+    print("  /help          - Show this help message.")
+    print("  /quit or /exit - Leave the assistant.")
     print()
-
-
-def _handle_summary(metrics: Dict[str, Any], language: str, t) -> None:
-    """Handle 'summary' / 'overview' command."""
-    overall = metrics["overall"]
-    monthly_trend = metrics["monthly_trend"]
-
-    print()
-    print(t("chat.headings.summary"))
-    print(insights.generate_overall_summary(overall, language=language))
-    print()
-    print(insights.generate_trend_insights(monthly_trend, language=language))
-    print()
-
-
-def _handle_top_segment(
-    metrics: Dict[str, Any],
-    seg_key: str,
-    human_name: str,
-    language: str,
-    t,
-) -> None:
-    """Handle 'top X' commands for segments like category, product, etc."""
-    segments = metrics.get("segments", {})
-    overall = metrics.get("overall", {})
-
-    if seg_key not in segments:
-        print()
-        print(t("chat.no_segment_info", human_name=human_name))
-        print()
-        return
-
-    seg_dict = {seg_key: segments[seg_key]}
-    text = insights.generate_segment_insights(seg_dict, overall, language=language)
-    print()
-    print(t("chat.headings.top_segments", human_name=human_name.title()))
-    print(text)
-    print()
-
-
-def _handle_trend(metrics: Dict[str, Any], language: str, t) -> None:
-    """Handle 'trend' command."""
-    trend = metrics.get("monthly_trend", {})
-    print()
-    print(t("chat.headings.trend"))
-    print(insights.generate_trend_insights(trend, language=language))
-    print()
-
-
-def _handle_anomaly(metrics: Dict[str, Any], language: str, t) -> None:
-    """Handle 'anomaly' command."""
-    anomaly = metrics.get("anomaly", {})
-    print()
-    print(t("chat.headings.anomaly"))
-    print(insights.generate_anomaly_insights(anomaly, language=language))
-    print()
-
-
-def _handle_time_series(metrics: Dict[str, Any], language: str, t) -> None:
-    """Handle 'time series' command."""
-    ts = metrics.get("time_series")
-    if not isinstance(ts, pd.DataFrame):
-        print()
-        print(t("chat.time_series_not_available"))
-        print()
-        return
-
-    print()
-    print(t("chat.headings.time_series"))
-    print(ts.head(10))
+    print("Anything else will be treated as a free-form question.")
     print()
 
 
 def start_chat_interface(context: Dict[str, Any]) -> None:
-    """Start an interactive chat-like loop in the terminal.
+    """Start the interactive chat loop.
 
-    Args:
-        context: Dictionary containing:
-            - "df": cleaned DataFrame
-            - "metrics": metrics bundle from analytics.build_metrics_bundle
-            - "config": Config object
-            - "language": optional language code for UI (e.g. "en", "id")
+    Parameters
+    ----------
+    context:
+        Dictionary containing shared objects from the main pipeline, typically:
+
+        - ``df``: cleaned transaction DataFrame.
+        - ``metrics``: metrics bundle from fig.analytics.build_metrics_bundle.
+        - ``config``: loaded Config object.
+        - ``language``: effective UI language (e.g. "en", "id").
+        - ``engine``: orchestration engine ("native" or "langchain").
     """
-    df = context.get("df")
-    metrics = context.get("metrics")
+    _print_banner()
+    _print_help()
+
     cfg = context.get("config")
-
-    if df is None or metrics is None or cfg is None:
-        raise ValueError(
-            "Chat context must include 'df', 'metrics', and 'config'."
-        )
-
-    raw_lang = context.get("language")
-    if raw_lang is None and hasattr(cfg, "ui"):
-        raw_lang = getattr(cfg.ui, "language", "en")
-
-    language = str(raw_lang).strip().lower() if raw_lang else "en"
-    t = get_translator(language)
-
-    print()
-    print(t("chat.welcome_1"))
-    print(t("chat.welcome_2"))
-    print(t("chat.welcome_3"))
-    print()
+    llm_cfg = getattr(cfg, "llm", None) if cfg is not None else None
 
     while True:
         try:
-            user_input = input(t("chat.prompt")).strip()
-        except (EOFError, KeyboardInterrupt):
-            print(t("chat.exit_goodbye_with_newline"))
+            user_input = input("you> ")
+        except (EOFError, KeyboardInterrupt):  # pragma: no cover - interactive only
+            print()
+            print("Exiting chat.")
             break
 
-        if not user_input:
+        stripped = user_input.strip()
+
+        if not stripped:
             continue
 
-        cmd = user_input.lower()
+        lower = stripped.lower()
 
-        if cmd in {"exit", "quit", "q"}:
-            print(t("chat.exit_goodbye"))
+        if lower in {"/quit", "/exit"}:
+            print("Goodbye!")
             break
+        elif lower == "/help":
+            _print_help()
+            continue
+        elif lower == "/summary":
+            # Prefer a dedicated helper if it exists; otherwise fall back to
+            # a generic free-form question.
+            if hasattr(llm_chatbot, "build_summary_answer"):
+                summary = llm_chatbot.build_summary_answer(context)
+            else:
+                summary = llm_chatbot.answer_freeform_question(
+                    "Give me a high-level summary of the key business metrics.",
+                    context,
+                )
+            print()
+            print(summary)
+            print()
+            continue
 
-        if cmd in {"help", "h", "?"}:
-            _print_help(t)
-        elif "summary" in cmd or "overview" in cmd:
-            _handle_summary(metrics, language, t)
-        elif "top" in cmd and "categor" in cmd:
-            _handle_top_segment(metrics, "category", "categories", language, t)
-        elif "top" in cmd and "product" in cmd:
-            _handle_top_segment(metrics, "product", "products", language, t)
-        elif "top" in cmd and "customer" in cmd:
-            _handle_top_segment(metrics, "customer_id", "customers", language, t)
-        elif "top" in cmd and "channel" in cmd:
-            _handle_top_segment(metrics, "channel", "channels", language, t)
-        elif "trend" in cmd:
-            _handle_trend(metrics, language, t)
-        elif "anomaly" in cmd or "alert" in cmd:
-            _handle_anomaly(metrics, language, t)
-        elif "time series" in cmd or "timeseries" in cmd:
-            _handle_time_series(metrics, language, t)
-        else:
-            # Unknown command: if LLM chat is enabled, try answering as a free-form question.
-            if hasattr(cfg, "llm") and getattr(cfg.llm, "enabled", False):
-                answer = llm_chatbot.answer_freeform_question(
-                    user_input,
-                    {
-                        "df": df,
-                        "metrics": metrics,
-                        "config": cfg,
-                        "language": language,
-                    },
+        elif lower == "/trend":
+            if hasattr(llm_chatbot, "build_trend_answer"):
+                trend = llm_chatbot.build_trend_answer(context)
+            else:
+                trend = llm_chatbot.answer_freeform_question(
+                    "Describe the recent revenue trend over time.",
+                    context,
+                )
+            print()
+            print(trend)
+            print()
+            continue
+
+        # ------------------------------------------------------------------
+        # Free-form question: choose between native and LangChain engines.
+        # ------------------------------------------------------------------
+        engine = str(context.get("engine", "native") or "native").lower()
+        llm_enabled = bool(getattr(llm_cfg, "enabled", False))
+        llm_mode = getattr(llm_cfg, "mode", "template") if llm_cfg is not None else "template"
+
+        use_langchain = (
+            engine == "langchain"
+            and llm_enabled
+            and llm_mode in {"llm", "hybrid"}
+        )
+
+        if use_langchain:
+            metrics_bundle = context.get("metrics") or {}
+            language = str(context.get("language") or "en")
+
+            try:
+                answer = answer_question_with_langchain(
+                    question=user_input,
+                    config=cfg,
+                    metrics_bundle=metrics_bundle,
+                    language=language,
+                )
+            except Exception as exc:  # pragma: no cover - defensive fallback
+                print()
+                print(
+                    f"[ERROR] LangChain chat failed, falling back to native engine: {exc}"
                 )
                 print()
-                print(answer)
-                print()
-            else:
-                print(t("chat.unknown_command"))
+                answer = llm_chatbot.answer_freeform_question(user_input, context)
+        else:
+            # Legacy/native path using fig.llm_chatbot.
+            answer = llm_chatbot.answer_freeform_question(user_input, context)
+
+        print()
+        print(answer)
+        print()

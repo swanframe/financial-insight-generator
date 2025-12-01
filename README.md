@@ -3,6 +3,7 @@
 ![Python 3.12+](https://img.shields.io/badge/python-3.12+-blue.svg)
 ![Interface](https://img.shields.io/badge/interface-CLI-green.svg)
 ![LLM](https://img.shields.io/badge/LLM-optional-orange.svg)
+![LangChain](https://img.shields.io/badge/LangChain-integrated-purple.svg)
 
 Financial Insight Generator (FIG) is a modular Python toolkit that turns raw
 transaction-level data (CSV/Excel) into:
@@ -11,14 +12,16 @@ transaction-level data (CSV/Excel) into:
 - Financial KPIs and segment breakdowns  
 - Human-readable insight reports  
 - An interactive CLI “assistant”, optionally powered by an LLM  
-- An optional vector index + RAG layer over your transactions
+- An optional vector index + RAG layer over your transactions  
+- A configurable **orchestration engine** (`native` vs `langchain`) for LLM + RAG flows
 
 Think of it as a small, extensible **junior financial analyst** you can run
 locally on a modest laptop (e.g. macOS Big Sur, 4 GB RAM), with:
 
 - A **template-only** deterministic mode (no API keys, fully offline)  
 - An **LLM-only** mode for narrative reports and chat  
-- A full **LLM + RAG** mode where the LLM is grounded in actual transactions via a vector store
+- A full **LLM + RAG** mode where the LLM is grounded in actual transactions via a vector store  
+- The option to run LLM features through either a **native engine** or a **LangChain-based engine**
 
 ---
 
@@ -31,9 +34,10 @@ locally on a modest laptop (e.g. macOS Big Sur, 4 GB RAM), with:
 - Config-driven architecture (`config.yaml`) with clean separation of concerns
 - Fully working on a small, offline machine (dummy embeddings, no API key)
 - When API keys are provided:
-  - Real LLM calls (via `fig.llm_client`)
-  - Real embeddings + vector search (via `chromadb`)
-- ~45 automated tests covering config, analytics, LLM wiring, vector store, and RAG integration
+  - Real LLM calls (via `fig.llm_client` or the LangChain engine)
+  - Real embeddings + vector search (e.g. via `chromadb`)
+- **Orchestration engine switch**: `native` vs `langchain`, controllable via config or CLI
+- ~45+ automated tests covering config, analytics, LLM wiring, vector store, and RAG integration
 
 ---
 
@@ -42,6 +46,7 @@ locally on a modest laptop (e.g. macOS Big Sur, 4 GB RAM), with:
 - [Features](#features)
 - [Tech Stack](#tech-stack)
 - [Architecture Overview](#architecture-overview)
+  - [Native vs LangChain Engines](#native-vs-langchain-engines)
 - [Directory Layout](#directory-layout)
 - [Installation](#installation)
 - [Configuration](#configuration)
@@ -53,6 +58,7 @@ locally on a modest laptop (e.g. macOS Big Sur, 4 GB RAM), with:
   - [LLM](#llm)
   - [Embeddings](#embeddings)
   - [Vector Store](#vector-store)
+  - [Orchestration / Engine](#orchestration--engine)
 - [Usage](#usage)
   - [One-off report script](#one-off-report-script)
   - [CLI](#cli)
@@ -99,6 +105,9 @@ locally on a modest laptop (e.g. macOS Big Sur, 4 GB RAM), with:
   - Optional **LLM-based narrative reports** that use analytics output as structured context.
   - Three modes: `template`, `llm`, `hybrid`.
   - In `llm` / `hybrid` modes, the LLM can be **RAG-grounded** using retrieved transactions.
+  - The LLM path can run via:
+    - A **native engine** (`fig.llm_client` + custom RAG wiring), or
+    - A **LangChain engine** (`langchain_chains.generate_report_with_langchain`).
 
 - **Interactive assistant (CLI)**
   - Rule-based commands for:
@@ -108,6 +117,9 @@ locally on a modest laptop (e.g. macOS Big Sur, 4 GB RAM), with:
     - Time series
   - **LLM-powered free-form questions** about the data when enabled.
   - Free-form questions can optionally use **RAG** (similar transactions) as extra context.
+  - Free-form questions can be answered by:
+    - Native chat path (`fig.llm_chatbot`), or
+    - LangChain chat chain (`langchain_chains.answer_question_with_langchain`).
 
 - **Multilingual UX**
   - English and Bahasa Indonesia support.
@@ -128,10 +140,12 @@ locally on a modest laptop (e.g. macOS Big Sur, 4 GB RAM), with:
 - **Core libraries:** `pandas`, `numpy`
 - **CLI & tooling:** standard library (`argparse`, `pathlib`)
 - **Testing:** `pytest`
-- **LLM integration (optional):** provider-agnostic client (`fig.llm_client`, e.g. OpenAI via `openai`)
+- **LLM integration (optional):**
+  - Provider-agnostic client (`fig.llm_client`, e.g. OpenAI via `openai`)
+  - LangChain wrappers (`langchain-core`, `langchain-openai`) for orchestration engine `langchain`
 - **Embeddings & vector DB (optional):**
   - Provider-agnostic embeddings (`openai` or a local `dummy` provider)
-  - `chromadb` for persistent vector storage
+  - Local vector store (e.g. `chromadb`) or in-memory implementation
 - **i18n:** YAML-based localization (`src/fig/locales/en.yaml`, `src/fig/locales/id.yaml`)
 
 ---
@@ -159,34 +173,37 @@ At a high level:
      ```
 4. **Insight generation**
    - Template-based (`fig.insights.generate_full_report`).
-   - LLM-based (`fig.llm_insights.generate_llm_report`) using:
+   - LLM-based via:
+     - **Native engine:** `fig.llm_insights.generate_llm_report`
+     - **LangChain engine:** `fig.langchain_chains.generate_report_with_langchain`
+   - Both use:
      - Structured context from `metrics_bundle`
-     - Optional **RAG context** (a small set of representative transactions)
+     - Optional **RAG context** (representative transactions).
 5. **LLM client & prompts**
    - `fig.llm_prompts` – builds language-aware system/user prompts.
-   - `fig.llm_client` – thin provider-agnostic wrapper around LLM APIs.
+   - `fig.llm_client` – thin provider-agnostic wrapper around LLM APIs (used by native engine).
+   - `fig.langchain_llm` – LangChain Chat model + embeddings wrappers (used by LangChain engine).
 6. **Embeddings & vector store**
    - `fig.embeddings.embed_texts(texts, config)`:
      - `provider: "openai"` – real embeddings via API.
      - `provider: "dummy"` – deterministic local embeddings (offline).
    - `fig.vector_store`:
-     - `build_or_update_index(df, config, rebuild=False)` – index transactions.
-     - `query_similar_transactions(query_text, config, top_k=None)` – nearest neighbours.
+     - Builds and queries the vector index.
 7. **RAG layer**
    - `fig.retrieval` – high-level retrieval API:
-     - `build_transaction_index_from_dataframe(df, config, rebuild=False)`
-     - `retrieve_transactions_for_query(query_text, config, ...)`
+     - Builds transaction index from a DataFrame.
+     - Retrieves relevant transactions given a query.
    - `fig.retrieval_schema` – `RetrievedTransaction` and `RetrievalContext` for clean, prompt-friendly RAG objects.
-   - Used by:
-     - `fig.llm_insights` for LLM reports.
-     - `fig.llm_chatbot` for free-form chat questions.
+   - **LangChain adapter**: `fig.langchain_retriever.TransactionsRetriever` exposes the same retrieval as a LangChain `BaseRetriever` returning `Document`s.
 8. **CLI & interactive assistant**
-   - `fig.cli` – entry point for:
+   - `src.fig.cli` – entry point for:
      - Running the pipeline.
      - Generating reports.
      - Entering interactive chat mode.
-   - `fig.chatbot` – rule-based commands (summary/trend/etc.).
-   - `fig.llm_chatbot` – LLM-powered free-form questions, optionally with RAG.
+   - `fig.chatbot` – high-level chat loop + command routing.
+   - **Free-form LLM logic**:
+     - Native: `fig.llm_chatbot.answer_freeform_question`.
+     - LangChain: `fig.langchain_chains.answer_question_with_langchain`.
 
 You can think of it as this pipeline:
 
@@ -201,11 +218,39 @@ analytics.build_metrics_bundle
            │
            │
 embeddings + vector_store + retrieval  ──▶  RAG context
-           │                               (RetrievedTransaction / RetrievalContext)
-           └────────── llm_insights.generate_llm_report (LLM + RAG)
+  (RetrievedTransaction / RetrievalContext)
+           ├────────── llm_insights.generate_llm_report (native LLM + RAG)
+           │
+           └────────── langchain_chains.generate_report_with_langchain (LangChain RAG chain)
                                      ↓
-                               CLI / chat (fig.cli, fig.chatbot, fig.llm_chatbot)
+                             CLI / chat (src.fig.cli, fig.chatbot)
+                                     │
+                                     ├─ llm_chatbot.answer_freeform_question (native)
+                                     └─ langchain_chains.answer_question_with_langchain (LangChain)
 ````
+
+### Native vs LangChain Engines
+
+Two orthogonal switches control behaviour:
+
+1. **LLM mode** (`config.llm.mode`):
+
+   * `template` – only template-based report; no LLM calls.
+   * `llm` – LLM-only narrative report (optionally RAG-grounded).
+   * `hybrid` – template report + LLM refinement (optionally RAG-grounded).
+
+2. **Orchestration engine** (`config.orchestration.engine` or CLI `--engine`):
+
+   * `native` – use the original Python pipeline:
+
+     * `llm_insights.generate_llm_report`
+     * `llm_chatbot.answer_freeform_question`
+   * `langchain` – use LangChain-based chains:
+
+     * `langchain_chains.generate_report_with_langchain`
+     * `langchain_chains.answer_question_with_langchain`
+
+This lets you demonstrate both “classic” RAG wiring and modern LangChain patterns in a single project.
 
 ---
 
@@ -241,6 +286,10 @@ embeddings + vector_store + retrieval  ──▶  RAG context
 │       ├── retrieval.py
 │       ├── retrieval_schema.py
 │       ├── vector_store.py
+│       ├── langchain_llm.py
+│       ├── langchain_documents.py
+│       ├── langchain_retriever.py
+│       ├── langchain_chains.py
 │       └── locales/
 │           ├── en.yaml
 │           └── id.yaml
@@ -286,19 +335,13 @@ embeddings + vector_store + retrieval  ──▶  RAG context
 
 4. Make sure Python can find the `src/` package. Either:
 
-   * Set `PYTHONPATH` in your shell:
+   * Set `PYTHONPATH`:
 
      ```bash
      export PYTHONPATH=src
      ```
 
-     or
-
-   * Prefix commands with `PYTHONPATH=src`, e.g.:
-
-     ```bash
-     PYTHONPATH=src python run_insights_report.py
-     ```
+   * Or prefix commands with `PYTHONPATH=src`.
 
 ---
 
@@ -311,7 +354,7 @@ All configuration lives in `config.yaml` and is loaded via `fig.config.load_conf
 ```yaml
 data:
   input_path: "data/raw/sample_transactions.csv"
-  date_format: "%Y-%m-%d"  # optional; let pandas infer if omitted
+  date_format: "%Y-%m-%d"
   parse_dates: true
 ```
 
@@ -330,7 +373,7 @@ columns:
   channel: "channel"
 ```
 
-If your raw file uses different column names, adjust these mappings.
+Adjust these to match your raw file.
 
 ### Analytics
 
@@ -363,26 +406,22 @@ ui:
   language: "en"   # or "id" for Bahasa Indonesia
 ```
 
-This language is used for:
+This controls:
 
 * Template-based reports
 * CLI banners and messages
-* Chatbot prompts and responses
-* LLM prompts (the model is explicitly told which language to answer in)
-
-You can also override it via CLI with `--lang`.
+* Chat prompts
+* LLM instructions on which language to answer in
 
 ### LLM
 
 The LLM section is **optional**. If omitted, FIG runs in pure template mode with `llm.enabled = false`.
 
-Example configuration:
-
 ```yaml
 llm:
   enabled: false          # master toggle; false = no LLM calls
 
-  provider: "openai"      # logical provider name
+  provider: "openai"      # logical provider name ("openai", "dummy", etc.)
   model: "gpt-4.1-mini"   # model name for your provider
 
   temperature: 0.3
@@ -410,39 +449,21 @@ llm:
 
 ### Embeddings
 
-Embeddings configuration is shared by the vector store and the RAG layer:
-
 ```yaml
 embeddings:
-  provider: "openai"              # "openai" for real embeddings, or "dummy" for a local demo
+  provider: "openai"              # "openai" or "dummy"
   model: "text-embedding-3-small" # ignored for dummy, used for real providers
   api_key_env_var: "OPENAI_API_KEY"
   timeout_seconds: 30
 ```
 
-Notes:
-
-* `provider: "openai"` uses the OpenAI embeddings API:
-
-  * `api_key_env_var` is looked up in the environment.
-  * Good for realistic similarity search and RAG.
-* `provider: "dummy"` uses a deterministic, local-only embedding implementation:
-
-  * No API key and no network required.
-  * Great for offline demos or when you’re out of quota.
-* The same embeddings config is used by:
-
-  * `run_build_vector_index.py`
-  * `run_vector_search.py`
-  * The RAG layer in `fig.llm_insights` and `fig.llm_chatbot` (when vector features are enabled).
+`provider: "dummy"` uses a fully local, deterministic embedding (no network).
 
 ### Vector Store
 
-The vector store section controls whether vector features are enabled and how the index is stored:
-
 ```yaml
 vector_store:
-  enabled: false                  # master toggle for all vector features
+  enabled: false                  # master toggle for vector features
 
   provider: "chroma"              # "chroma" (persistent) or "in_memory"
   persist_path: "data/vector_store"
@@ -451,34 +472,32 @@ vector_store:
   default_top_k: 5
 ```
 
-Notes:
+### Orchestration / Engine
 
-* When `enabled: false`, scripts that depend on vector search (index build, vector CLI, RAG) simply skip vector logic; the rest of FIG is unaffected.
-* `provider: "chroma"`:
+This is where you choose between the **native** and **LangChain** orchestration:
 
-  * Uses `chromadb` as a local-first vector database.
-  * Persists the index under `persist_path`.
-* `provider: "in_memory"`:
+```yaml
+orchestration:
+  engine: "native"    # "native" or "langchain"
+```
 
-  * Uses an in-process Python implementation.
-  * Does not write anything to disk (handy for tests and quick demos).
-* The **RAG layer** (for reports and chat) reuses this same vector store:
+* `native` – use `llm_insights` + `llm_chatbot` directly.
+* `langchain` – use `langchain_chains` + `langchain_retriever` and LangChain’s `Runnable` pipelines.
 
-  * If `vector_store.enabled: true` and the index is built, the LLM sees additional “RAG context” in its prompt.
-  * If disabled or misconfigured, RAG is silently skipped and the LLM falls back to metrics-only context.
+You can override this via CLI `--engine`.
 
 ---
 
 ## Usage
 
-> **Note:** In the examples below, assume `src` is on `PYTHONPATH` (e.g. `export PYTHONPATH=src`).
+> Assume `PYTHONPATH=src` is set in the examples below.
 
 ### One-off report script
 
 Run the full pipeline + report generation:
 
 ```bash
-python run_insights_report.py
+python run_insights_report.py --config config.yaml
 ```
 
 Options:
@@ -487,204 +506,169 @@ Options:
 python run_insights_report.py \
   --config config.yaml \
   --lang en \
-  --report-mode template    # or llm / hybrid
+  --report-mode template    # or llm / hybrid \
+  --engine native           # or langchain
 ```
+
+* `--engine` only matters when `llm.enabled: true` and `mode` is `llm` or `hybrid`.
 
 ### CLI
 
-A convenient wrapper around the full workflow lives in `fig.cli`:
+Main CLI entrypoint:
 
 ```bash
-python -m fig.cli --config config.yaml
+python -m src.fig.cli --config config.yaml
 ```
 
-This will:
+Common flags:
 
-1. Load the config.
-2. Run the data pipeline.
-3. Run analytics.
-4. Print the report (template or LLM, depending on config).
-5. Optionally start an interactive chat session if you pass `--interactive`.
+* `--no-report` – skip printing the report (useful for chat only).
+* `--interactive` – start interactive chat after report.
+* `--lang` – override language.
+* `--report-mode {template,llm,hybrid}` – override LLM mode.
+* `--engine {native,langchain}` – choose orchestration engine.
+
+Example:
 
 ```bash
-python -m fig.cli --config config.yaml --interactive
+python -m src.fig.cli --config config.yaml --engine langchain --interactive
 ```
 
 ### LLM report modes
 
-The effective report mode is:
+Effective report mode:
 
-> CLI `--report-mode` (if provided) → `llm.mode` in `config.yaml` → `"template"`
+> CLI `--report-mode` → `llm.mode` in config → `"template"`
 
 * `template`
-  Uses `generate_full_report(metrics_bundle, language)`.
-  **No LLM calls** are made, even if `llm.enabled: true`.
+  Uses `insights.generate_full_report`. No LLM calls.
 
 * `llm`
-  Uses `generate_llm_report(..., mode_override="llm")`:
 
-  * Summarizes `metrics_bundle` into compact structured context.
-  * If vector features are enabled and an index exists, retrieves **representative transactions** via `fig.retrieval`.
-  * Builds an LLM prompt via `fig.llm_prompts`, including both metrics and (optionally) RAG context.
-  * Calls the provider via `fig.llm_client.generate_text`.
+  * Native engine:
+
+    * `llm_insights.generate_llm_report(..., mode_override="llm")`
+  * LangChain engine:
+
+    * `langchain_chains.generate_report_with_langchain(..., template_report=None)`
 
 * `hybrid`
-  Uses `generate_llm_report(..., mode_override="hybrid")`:
 
-  * First builds the template report.
-  * Passes both the report and metrics into the LLM.
-  * Optionally includes RAG context if available.
-  * The LLM refines/rewrites the report into a more narrative style.
+  * Native engine:
 
-If `llm.enabled: false`, the LLM modes automatically fall back to the template report with a short explanatory note.
+    * template report first, then `generate_llm_report(..., mode_override="hybrid")`
+  * LangChain engine:
+
+    * template report first, then `generate_report_with_langchain(..., template_report=template_report)`
+
+If `llm.enabled: false`, LLM modes fall back to template with a note.
 
 ### Interactive assistant (chat)
 
 Start interactive mode:
 
 ```bash
-python -m fig.cli --config config.yaml --interactive
+python -m src.fig.cli --config config.yaml --interactive
 ```
 
 #### Rule-based commands
 
-The following commands are recognized by the rule-based chatbot:
+Handled by `fig.chatbot` and/or `fig.llm_chatbot` (non-LLM logic):
 
-* `summary`
-* `overview`
-* `top categories`
-* `top products`
-* `top customers`
-* `top channels`
-* `trend`
-* `anomaly`
-* `time series`
-* `help`
-* `exit`
+* `/summary`
+* `/trend`
+* `/help`
+* `/quit` or `/exit`
 
-These are handled by deterministic logic in `fig.chatbot` and behave the same whether or not the LLM is enabled.
+(Plus other commands depending on chat implementation: overview, top segments, etc.)
 
-#### Free-form questions (LLM + optional RAG)
+These work the same regardless of engine.
 
-If `llm.enabled: true`, any input that does **not** match a known command is treated as a free-form question and routed through `fig.llm_chatbot`, for example:
+#### Free-form questions
 
-* `Is there anything unusual about recent sales?`
-* `Why did revenue increase in March?`
-* `Which customers contributed most to the last anomaly?`
+Anything else is treated as a free-form question:
 
-When vector features are enabled (`vector_store.enabled: true` and the index is built):
+* Native engine:
 
-* The question + high-level metrics are turned into a **retrieval query**.
-* `fig.retrieval.retrieve_transactions_for_query(...)` returns a small set of relevant transactions.
-* These are summarized into a compact `[RAG context: ...]` block and appended to the LLM prompt.
-* The LLM answers with the benefit of both **structured metrics** and **concrete examples**.
+  * `fig.llm_chatbot.answer_freeform_question(...)`
+* LangChain engine:
 
-If vector features are disabled or misconfigured, chat still works; it just becomes **LLM-only** (metrics-based, no RAG).
+  * `langchain_chains.answer_question_with_langchain(...)`
+
+Both can optionally include RAG context if `vector_store.enabled: true` and an index exists.
 
 ### Multilingual usage (EN / ID)
 
-The same CLI commands work for both English and Bahasa Indonesia.
+Use `ui.language` in config:
 
-Examples:
+```yaml
+ui:
+  language: "id"
+```
 
-* English report and chat:
+Or override via CLI:
 
-  ```bash
-  python -m fig.cli --config config.yaml --lang en
-  ```
+```bash
+python run_insights_report.py --config config.yaml --lang id
+python -m src.fig.cli --config config.yaml --lang id
+```
 
-* Indonesian report and chat:
+The language is respected for:
 
-  ```bash
-  python -m fig.cli --config config.yaml --lang id
-  ```
-
-For Indonesian:
-
-* Template reports use translated headings and phrases from `locales/id.yaml`.
-* Chat messages (`help`, `welcome`, `unknown_command`, etc.) are in Bahasa Indonesia.
-* LLM prompts explicitly ask the model to respond in Bahasa Indonesia.
+* Template reports
+* CLI text
+* LLM prompts (native + LangChain)
 
 ### Vector index build & search
 
-To use vector / RAG features, you need to:
+Enable in config:
 
-1. Enable the vector store in `config.yaml`:
+```yaml
+vector_store:
+  enabled: true
+  provider: "chroma"
+  persist_path: "data/vector_store"
+  collection_name: "fig_transactions"
+```
 
-   ```yaml
-   vector_store:
-     enabled: true
-     provider: "chroma"         # or "in_memory"
-     persist_path: "data/vector_store"
-     collection_name: "fig_transactions"
-   ```
+Choose embeddings:
 
-2. Choose an embeddings provider (real or dummy):
+```yaml
+embeddings:
+  provider: "openai"   # or "dummy" for local-only demos
+```
 
-   ```yaml
-   embeddings:
-     provider: "openai"         # or "dummy" for local-only demos
-   ```
+Build index:
 
-3. Build the index:
+```bash
+python run_build_vector_index.py --config config.yaml
+```
 
-   ```bash
-   python run_build_vector_index.py --config config.yaml
-   ```
+Search:
 
-4. Run a similarity search via CLI:
+```bash
+python run_vector_search.py \
+  --config config.yaml \
+  --query "large electronics orders in March"
+```
 
-   ```bash
-   python run_vector_search.py \
-     --config config.yaml \
-     --query "large transactions in March"
-   ```
+The same index is reused by RAG in both native and LangChain engines.
 
-This prints a ranked list of matching transactions with similarity scores and metadata.
+### RAG debug & observability (FIG_DEBUG_RAG)
 
-### RAG debug & observability (`FIG_DEBUG_RAG`)
-
-For deeper visibility into RAG behaviour, you can turn on an opt-in debug mode:
+Turn on verbose RAG logging:
 
 ```bash
 export FIG_DEBUG_RAG=1
 ```
 
-With `FIG_DEBUG_RAG` set:
+You’ll see RAG information printed whenever:
 
-* Index builds print lines like:
+* The index is built.
+* RAG is used for reports.
+* RAG is used for free-form chat questions.
 
-  ```text
-  [FIG RAG] Built vector index for 35 rows using provider 'chroma' (rebuild=False)
-  ```
-
-* Retrieval calls print lines like:
-
-  ```text
-  [FIG RAG] Retrieved 5 matches for query 'transactions that best explain the following aspects of the data: ...' (top3: txn-10:0.002, txn-12:0.001, txn-18:0.001)
-  [FIG RAG] Report retrieval context:
-  [FIG RAG] [RAG context: sample transactions]
-  [FIG RAG] 1. 2024-01-15T00:00:00 | category=Electronics | product=Noise Cancelling Headphones | amount=180.00 | similarity=0.002
-  ...
-  ```
-
-* For chat questions, you’ll see:
-
-  ```text
-  [FIG RAG] Chat retrieval context:
-  [FIG RAG] [RAG context: relevant transactions]
-  ...
-  ```
-
-Internally, the last chat RAG summary is also stored on the context as:
-
-```python
-context["last_rag_summary"]
-```
-
-which can be reused later for “show evidence” UX.
-
-Unset the variable to disable debug output:
+Disable:
 
 ```bash
 unset FIG_DEBUG_RAG
@@ -696,107 +680,67 @@ unset FIG_DEBUG_RAG
 
 ### Mode A – Template-only (fully offline)
 
-*No API key, no network, minimal RAM — works on macOS Big Sur with 4 GB.*
+```yaml
+llm:
+  enabled: false
 
-1. In `config.yaml`:
+embeddings:
+  provider: "dummy"
 
-   ```yaml
-   llm:
-     enabled: false
+vector_store:
+  enabled: false
+```
 
-   embeddings:
-     provider: "dummy"
+Run:
 
-   vector_store:
-     enabled: false
-   ```
-
-2. Run:
-
-   ```bash
-   python run_insights_report.py
-   python -m fig.cli --config config.yaml --interactive
-   ```
-
-You’ll get:
-
-* Cleaned data saved to `data/processed/cleaned_transactions.csv`.
-* Analytics and a deterministic insight report.
-* An interactive CLI with rule-based commands only (no LLM, no RAG).
+```bash
+python run_insights_report.py --config config.yaml
+python -m src.fig.cli --config config.yaml --interactive
+```
 
 ### Mode B – LLM only
 
-*LLM narrative, but no vector / RAG. Requires an API key, but no vector index.*
+```yaml
+llm:
+  enabled: true
+  provider: "openai"
+  mode: "llm"
 
-1. In `config.yaml`:
+vector_store:
+  enabled: false
 
-   ```yaml
-   llm:
-     enabled: true
-     mode: "llm"      # or "hybrid"
-   vector_store:
-     enabled: false
-   ```
+orchestration:
+  engine: "native"    # or "langchain"
+```
 
-2. Export your API key:
-
-   ```bash
-   export OPENAI_API_KEY="sk-...your-key-here..."
-   ```
-
-3. Run:
-
-   ```bash
-   python run_insights_report.py --config config.yaml
-   python -m fig.cli --config config.yaml --interactive
-   ```
-
-The report and free-form chat answers will be LLM-generated based on metrics, but without RAG context.
+Export API key and run report + CLI.
 
 ### Mode C – LLM + RAG
 
-*LLM narrative + grounded in real transactions. Requires an API key and local vector index.*
+```yaml
+llm:
+  enabled: true
+  provider: "openai"
+  mode: "llm"
 
-1. In `config.yaml`:
+embeddings:
+  provider: "openai"
 
-   ```yaml
-   llm:
-     enabled: true
-     mode: "llm"      # or "hybrid"
+vector_store:
+  enabled: true
+  provider: "chroma"
 
-   embeddings:
-     provider: "openai"   # or "dummy" if you only want local RAG demos
+orchestration:
+  engine: "native"    # or "langchain"
+```
 
-   vector_store:
-     enabled: true
-     provider: "chroma"   # or "in_memory"
-   ```
+Then:
 
-2. Export your API key (for real embeddings + LLM):
-
-   ```bash
-   export OPENAI_API_KEY="sk-...your-key-here..."
-   ```
-
-3. Build the index:
-
-   ```bash
-   python run_build_vector_index.py --config config.yaml
-   ```
-
-4. Run the report + chat:
-
-   ```bash
-   python run_insights_report.py --config config.yaml --report-mode llm
-   python -m fig.cli --config config.yaml --interactive
-   ```
-
-Now:
-
-* The report is LLM-generated and includes a small RAG context block in the prompt.
-* Free-form chat questions use both metrics and relevant transactions.
-
-If anything goes wrong in the vector layer, FIG quietly falls back to metrics-only LLM behaviour.
+```bash
+python run_build_vector_index.py --config config.yaml
+python run_insights_report.py --config config.yaml --report-mode llm
+python -m src.fig.cli --config config.yaml --interactive
+```
 
 ---
 
@@ -805,33 +749,30 @@ If anything goes wrong in the vector layer, FIG quietly falls back to metrics-on
 **Fully offline / local:**
 
 * Data pipeline, analytics, and template reports.
-* CLI rule-based commands (`summary`, `trend`, etc.).
+* CLI rule-based commands (`/summary`, `/trend`, etc.).
 * `embeddings.provider: "dummy"` (local deterministic vectors).
 * `vector_store.provider: "in_memory"` (in-process store).
 * Vector index build + similarity search using dummy embeddings.
+* LangChain engine also works offline with `provider: "dummy"`.
 
 **Requires an API key:**
 
 * `llm.enabled: true` with `provider: "openai"` (or another cloud LLM).
 * `embeddings.provider: "openai"` for real embeddings.
-* RAG quality (semantic similarity) improves with real embeddings, but you can still prototype the pipeline with dummy embeddings.
-
-This separation makes FIG usable as:
-
-* A **completely offline analytics + CLI tool** on a small laptop.
-* A **full LLM + RAG project** when you have an API key and want to showcase AI engineering skills.
+* Native and LangChain engines both use the same `Config.llm` and `Config.embeddings`.
 
 ---
 
 ## Testing
 
-Run the full test suite with:
+Run the full test suite:
 
 ```bash
 pytest
 ```
 
-You should see all tests pass (around 45 tests), with only minor pandas FutureWarnings about `"M"` vs `"ME"` resampling.
+You should see all tests pass (around ~47 tests), with only minor pandas
+FutureWarnings about `"M"` vs `"ME"` resampling.
 
 The test suite covers:
 
@@ -844,17 +785,10 @@ The test suite covers:
 * Embeddings (OpenAI vs dummy) and configuration error handling.
 * Vector store configuration, in-memory implementation, and CLI.
 * RAG schema (`fig.retrieval_schema`) and retrieval API (`fig.retrieval`).
-* Integration tests that assert **RAG context is actually injected** into:
+* Integration tests that assert RAG context is actually injected into:
 
   * LLM report prompts.
   * Chat prompts.
-
-From a hiring / portfolio perspective, the tests show:
-
-* Config-driven, modular design.
-* Components that work both **with** and **without** external services.
-* Robust handling of misconfiguration, missing keys, and provider errors.
-* Validation of **prompt wiring** and **RAG integration** without hitting external APIs.
 
 ---
 
@@ -863,23 +797,25 @@ From a hiring / portfolio perspective, the tests show:
 * **Structured analytics first, LLM second**
 
   * Clear separation between data/analytics and LLM layers.
-  * LLM operates on a rich `metrics_bundle` and optional RAG context.
+  * LLM (native or LangChain) operates on a rich `metrics_bundle` and optional RAG context.
 
 * **Config-driven architecture**
 
   * Behaviour controlled via `config.yaml`.
   * Easy switches between template-only, LLM-only, and LLM+RAG.
+  * Extra switch for orchestration engine (`native` vs `langchain`).
 
-* **Provider-agnostic LLM client**
+* **Provider-agnostic LLM client + LangChain**
 
-  * `fig.llm_client` abstracts the LLM backend.
+  * `fig.llm_client` abstracts the LLM backend for the native path.
+  * `fig.langchain_llm` wraps the same config for LangChain.
   * LLM can be disabled, misconfigured, or swapped without breaking the core system.
 
 * **RAG-ready by design**
 
   * Transaction-level embeddings and vector store with a clean API.
-  * `fig.retrieval` and `fig.retrieval_schema` provide a stable RAG contract.
-  * LLM report & chat automatically pull in relevant transactions when RAG is enabled.
+  * `fig.retrieval` + `fig.retrieval_schema` provide a stable RAG contract.
+  * Native and LangChain report/chat both reuse the same RAG layer.
 
 * **Multilingual UX**
 
@@ -892,51 +828,27 @@ From a hiring / portfolio perspective, the tests show:
   * Graceful fallbacks when LLM or vector store configuration is missing or invalid.
   * Clear, user-friendly notes when LLM features are disabled.
 
-In short, this is a **complete RAG-style AI engineering project**:
-
-* Realistic financial analytics.
-* Optional LLM narrative layer.
-* Vector-based retrieval over actual transactions.
-* Tested, debuggable, and runnable on a modest local machine.
-
 ---
 
 ## Future Enhancements
 
-The core system is already end-to-end and usable. Some **optional extensions** that could be added later:
+Some potential extensions on top of the existing architecture:
 
-* **Documentation & diagrams**
+* **Docs & diagrams**
 
-  * Add a `docs/` folder with:
-
-    * A short architecture diagram.
-    * Example prompts and answers.
-    * A “design decisions” write-up.
+  * Add a `docs/` folder with architecture diagrams and design notes.
 
 * **“Show evidence” in chat**
 
-  * Add a CLI command to display the last RAG block, e.g.:
-
-    * `evidence` → prints `context["last_rag_summary"]`.
+  * Add a command to display the last RAG block (e.g. `/evidence`).
 
 * **Web API wrapper**
 
-  * Wrap FIG in a small FastAPI or Flask service exposing:
-
-    * `/metrics`
-    * `/report`
-    * `/chat`
-    * `/search`
+  * Wrap FIG in a small FastAPI or Flask service exposing metrics, reports, chat, and search.
 
 * **Simple UI**
 
-  * Attach a minimal React or Streamlit dashboard:
-
-    * KPI cards + charts.
-    * LLM + RAG answers.
-    * Inspectable evidence list.
-
-These are natural next steps on top of the existing architecture; they don’t require rewriting the core, just building on what’s already there.
+  * Attach a small dashboard (Streamlit, React) on top of the existing CLI + RAG backend.
 
 ---
 

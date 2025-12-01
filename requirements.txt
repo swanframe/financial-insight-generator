@@ -4,3 +4,8 @@ pyyaml>=6.0.0
 pytest>=8.0.0
 openai>=1.0.0
 chromadb>=0.5.0
+langchain-core>=0.3.0
+langchain-openai>=0.1.0
+# plus any other packages you previously had:
+# rich>=13.0.0
+# click>=8.1.0
