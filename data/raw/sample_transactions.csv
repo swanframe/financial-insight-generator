@@ -1,36 +1,599 @@
 order_id,order_date,total_price,cost,category,product_name,customer_id,sales_channel
-1,2024-01-02,120.50,80.00,Electronics,Wireless Headphones,CUST001,Online
-2,2024-01-03,45.00,20.00,Books,Data Science Handbook,CUST002,Online
-3,2024-01-03,89.99,50.00,Home,Blender Pro,CUST003,Store
-4,2024-01-04,250.00,150.00,Electronics,4K Monitor,CUST001,Online
-5,2024-01-05,35.00,18.00,Clothing,Basic T-Shirt,CUST004,Store
-6,2024-01-06,60.00,30.00,Clothing,Jeans Classic,CUST005,Store
-7,2024-01-07,300.00,190.00,Electronics,Gaming Console,CUST006,Online
-8,2024-01-08,22.50,10.00,Books,Python Crash Course,CUST002,Online
-9,2024-01-09,15.00,7.00,Grocery,Organic Coffee Beans,CUST007,Marketplace
-10,2024-01-10,99.99,60.00,Home,Air Fryer,CUST003,Store
-11,2024-01-15,180.00,110.00,Electronics,Noise Cancelling Headphones,CUST008,Online
-12,2024-01-18,55.00,30.00,Clothing,Hoodie Warm,CUST009,Store
-13,2024-01-20,42.00,20.00,Grocery,Weekly Essentials Pack,CUST010,Marketplace
-14,2024-02-01,130.00,85.00,Electronics,Bluetooth Speaker,CUST001,Online
-15,2024-02-02,75.00,40.00,Home,Electric Kettle,CUST011,Store
-16,2024-02-03,49.99,25.00,Books,Machine Learning Guide,CUST002,Online
-17,2024-02-05,210.00,140.00,Electronics,Office Laptop,CUST012,Online
-18,2024-02-07,33.00,16.00,Clothing,Summer Shorts,CUST004,Store
-19,2024-02-09,19.50,9.00,Grocery,Snacks Variety Pack,CUST007,Marketplace
-20,2024-02-11,89.00,50.00,Home,Desk Lamp LED,CUST003,Store
-21,2024-02-15,260.00,170.00,Electronics,Gaming Monitor,CUST006,Online
-22,2024-02-18,39.00,19.00,Books,SQL Basics,CUST002,Online
-23,2024-02-20,58.00,30.00,Clothing,Sneakers Low,CUST005,Store
-24,2024-03-01,145.00,95.00,Electronics,Tablet 10in,CUST013,Online
-25,2024-03-02,65.00,35.00,Home,Vacuum Cleaner Mini,CUST011,Store
-26,2024-03-03,27.50,13.00,Grocery,Breakfast Bundle,CUST010,Marketplace
-27,2024-03-05,52.00,26.00,Clothing,Formal Shirt,CUST004,Store
-28,2024-03-07,199.00,130.00,Electronics,Smartwatch Sport,CUST008,Online
-29,2024-03-09,24.00,12.00,Books,Statistics Essentials,CUST002,Online
-30,2024-03-10,105.00,65.00,Home,Office Chair Basic,CUST003,Store
-31,2024-03-12,18.00,8.00,Grocery,Tea Selection Pack,CUST007,Marketplace
-32,2024-03-15,310.00,200.00,Electronics,High-End GPU,CUST006,Online
-33,2024-03-18,72.00,36.00,Clothing,Running Shoes,CUST005,Store
-34,2024-03-20,55.00,28.00,Books,Deep Learning Primer,CUST002,Online
-35,2024-03-22,95.00,55.00,Home,Smart Thermostat,CUST011,Store
+1,2025-10-19,55500,38000,Makanan Utama,Ayam Penyet + Es Jeruk,GOF_7912,GoFood
+2,2025-10-19,41500,22000,Makanan Utama,Nasi Pecel Madiun,TABLE_18,Dine-in
+3,2025-10-19,60500,33000,Paket Hemat,Paket Ayam Penyet + Es Jeruk,TABLE_14,Dine-in
+4,2025-10-19,44500,23000,Makanan Utama,Bakmi Jawa + Es Jeruk,TABLE_02,Dine-in
+5,2025-10-19,130500,91000,Paket Hemat,Paket Keluarga 2-3 Orang,GOF_6925,GoFood
+6,2025-10-19,13500,5500,Minuman,Es Teh Manis,TA_396,Takeaway
+7,2025-10-19,18000,8000,Camilan,Tempe Mendoan,SPF_6977,ShopeeFood
+8,2025-10-19,55000,36500,Makanan Utama,Ayam Penyet,TABLE_06,Dine-in
+9,2025-10-19,83000,45000,Makanan Utama,Sate Ayam Madura + Kopi Tubruk,TA_157,Takeaway
+10,2025-10-19,62500,33500,Makanan Utama,Bakmi Jawa + Kopi Tubruk,TABLE_16,Dine-in
+11,2025-10-19,14500,6500,Camilan,Pisang Goreng,TABLE_08,Dine-in
+12,2025-10-19,237500,143500,Paket Hemat,Paket Keluarga 2-3 Orang,GOF_3266,GoFood
+13,2025-10-19,52500,31000,Makanan Utama,Gudeg Jogja + Wedang Uwuh,TA_710,Takeaway
+14,2025-10-19,62500,38000,Paket Hemat,Paket Gudeg Komplet,SPF_5371,ShopeeFood
+15,2025-10-20,62000,34500,Makanan Utama,Ayam Penyet + Es Teh Manis,GOF_9201,GoFood
+16,2025-10-20,74500,45500,Paket Hemat,Paket Gudeg Komplet,GOF_4258,GoFood
+17,2025-10-20,13000,5500,Minuman,Es Teh Manis,TABLE_01,Dine-in
+18,2025-10-20,50500,27500,Makanan Utama,Ayam Penyet + Es Jeruk,TABLE_18,Dine-in
+19,2025-10-20,61500,39500,Makanan Utama,Sate Ayam Madura + Es Cendol,GOF_4295,GoFood
+20,2025-10-20,42500,23500,Makanan Utama,Bakmi Jawa,GOF_2049,GoFood
+21,2025-10-20,114500,62500,Paket Hemat,Paket Rawon + Es Teh + Es Jeruk,TABLE_08,Dine-in
+22,2025-10-21,30500,19500,Makanan Utama,Bakmi Jawa,TABLE_18,Dine-in
+23,2025-10-21,21500,10500,Camilan,Sate Usus,TABLE_16,Dine-in
+24,2025-10-21,56500,31500,Makanan Utama,Rawon Surabaya,GRB_1887,GrabFood
+25,2025-10-21,13000,5500,Dessert,Bakpia Pathok,GOF_6559,GoFood
+26,2025-10-21,46000,27000,Makanan Utama,Nasi Pecel Madiun + Tahu Bacem,GRB_2235,GrabFood
+27,2025-10-21,26000,12000,Camilan,Sate Usus + Getuk,TABLE_03,Dine-in
+28,2025-10-22,16500,9000,Camilan,Tahu Bacem,GRB_4502,GrabFood
+29,2025-10-22,32500,16000,Camilan,Tahu Bacem + Klepon,GRB_8454,GrabFood
+30,2025-10-22,17500,7500,Minuman,Es Campur,TABLE_07,Dine-in
+31,2025-10-22,99000,71000,Paket Hemat,Paket Gudeg Komplet + Es Campur,SPF_9701,ShopeeFood
+32,2025-10-22,26000,12000,Dessert,Bakpia Pathok,TABLE_20,Dine-in
+33,2025-10-22,14000,8000,Camilan,Pisang Goreng,TABLE_19,Dine-in
+34,2025-10-22,82500,44000,Paket Hemat,Paket Gudeg Komplet,TABLE_11,Dine-in
+35,2025-10-23,52500,31500,Makanan Utama,Bakmi Jawa + Wedang Uwuh,GRB_2188,GrabFood
+36,2025-10-23,10500,3500,Minuman,Es Jeruk,TABLE_17,Dine-in
+37,2025-10-23,16000,7500,Camilan,Tempe Mendoan,TABLE_06,Dine-in
+38,2025-10-23,100000,60500,Paket Hemat,Paket Ayam Penyet + Es Jeruk,TABLE_17,Dine-in
+39,2025-10-23,25000,10500,Camilan,Lumpia Semarang,TABLE_05,Dine-in
+40,2025-10-24,14500,8000,Camilan,Sate Usus,TABLE_20,Dine-in
+41,2025-10-24,48500,25000,Makanan Utama,Ayam Penyet,TABLE_03,Dine-in
+42,2025-10-24,12000,7500,Camilan,Tempe Mendoan,GOF_3143,GoFood
+43,2025-10-24,103500,58000,Makanan Utama,Sate Ayam Madura + Tahu Bacem + Klepon,GOF_3426,GoFood
+44,2025-10-25,41000,26500,Makanan Utama,Bakmi Jawa + Tahu Bacem,TABLE_18,Dine-in
+45,2025-10-25,36000,24500,Makanan Utama,Soto Ayam Kampung,GRB_7755,GrabFood
+46,2025-10-25,16500,6000,Minuman,Jeruk Panas,TABLE_08,Dine-in
+47,2025-10-25,13000,4000,Minuman,Es Jeruk,TABLE_16,Dine-in
+48,2025-10-25,17500,10000,Camilan,Pisang Goreng,TABLE_08,Dine-in
+49,2025-10-25,17500,7000,Minuman,Es Cendol,TABLE_03,Dine-in
+50,2025-10-25,60500,35500,Makanan Utama,Tongseng Ayam,SPF_2889,ShopeeFood
+51,2025-10-25,51000,30000,Makanan Utama,Ayam Penyet + Es Cendol,GRB_9379,GrabFood
+52,2025-10-25,26000,14000,Camilan,Tahu Bacem + Klepon,TABLE_17,Dine-in
+53,2025-10-25,84000,56000,Paket Hemat,Paket Rawon + Es Teh,GRB_6409,GrabFood
+54,2025-10-25,16000,6500,Minuman,Es Jeruk,GOF_9308,GoFood
+55,2025-10-25,76000,49000,Makanan Utama,Tongseng Ayam + Wedang Uwuh,TABLE_06,Dine-in
+56,2025-10-25,61500,40000,Makanan Utama,Gudeg Jogja + Es Cendol,TA_552,Takeaway
+57,2025-10-25,46000,28000,Makanan Utama,Sate Ayam Madura,TABLE_20,Dine-in
+58,2025-10-26,15000,8500,Camilan,Tahu Bacem,TABLE_07,Dine-in
+59,2025-10-26,40000,24000,Makanan Utama,Sate Ayam Madura,TABLE_13,Dine-in
+60,2025-10-26,54500,33000,Makanan Utama,Gudeg Jogja,TABLE_08,Dine-in
+61,2025-10-26,45500,20000,Dessert,Getuk + Bakpia Pathok,TABLE_04,Dine-in
+62,2025-10-26,21000,8500,Camilan,Sate Usus,TABLE_15,Dine-in
+63,2025-10-26,21000,6500,Minuman,Es Cendol,TA_262,Takeaway
+64,2025-10-26,76000,43000,Paket Hemat,Paket Ayam Penyet + Es Jeruk,GOF_9540,GoFood
+65,2025-10-26,40000,22500,Makanan Utama,Sate Ayam Madura,TABLE_18,Dine-in
+66,2025-10-26,74000,44500,Makanan Utama,Tongseng Ayam + Kopi Tubruk,TABLE_15,Dine-in
+67,2025-10-26,51000,35000,Makanan Utama,Tongseng Ayam,TABLE_19,Dine-in
+68,2025-10-26,38000,21000,Makanan Utama,Bakmi Jawa,TABLE_14,Dine-in
+69,2025-10-26,20000,7000,Minuman,Kopi Tubruk,TA_546,Takeaway
+70,2025-10-26,79000,51500,Makanan Utama,Tongseng Ayam + Es Campur,TABLE_13,Dine-in
+71,2025-10-26,15500,5000,Minuman,Es Jeruk,TA_987,Takeaway
+72,2025-10-27,61500,32500,Makanan Utama,Tongseng Ayam + Jeruk Panas,TABLE_14,Dine-in
+73,2025-10-27,54500,37500,Makanan Utama,Gudeg Jogja,TABLE_03,Dine-in
+74,2025-10-27,16000,7500,Minuman,Es Teh Manis,GRB_1333,GrabFood
+75,2025-10-27,62500,45000,Makanan Utama,Sate Ayam Madura + Lumpia Semarang,GOF_2876,GoFood
+76,2025-10-27,35500,20500,Makanan Utama,Ayam Penyet,GOF_7149,GoFood
+77,2025-10-27,15000,5500,Minuman,Es Jeruk,TABLE_08,Dine-in
+78,2025-10-27,16500,7000,Minuman,Es Jeruk,TABLE_02,Dine-in
+79,2025-10-28,64500,43000,Paket Hemat,Paket Ayam Penyet + Es Jeruk,TABLE_14,Dine-in
+80,2025-10-28,49000,29000,Makanan Utama,Bakmi Jawa,GRB_3885,GrabFood
+81,2025-10-28,22000,9500,Dessert,Klepon,GOF_9817,GoFood
+82,2025-10-28,81000,56500,Paket Hemat,Paket Ayam Penyet + Es Jeruk,GOF_2419,GoFood
+83,2025-10-28,194500,101500,Paket Hemat,Paket Keluarga 2-3 Orang,TABLE_01,Dine-in
+84,2025-10-28,49000,29500,Makanan Utama,Sate Ayam Madura,TABLE_20,Dine-in
+85,2025-10-28,67000,41000,Makanan Utama,Gudeg Jogja + Pisang Goreng,GOF_4937,GoFood
+86,2025-10-29,22500,10500,Minuman,Es Campur,GOF_2524,GoFood
+87,2025-10-29,35000,21000,Makanan Utama,Nasi Pecel Madiun,TABLE_12,Dine-in
+88,2025-10-29,13000,5500,Minuman,Jeruk Panas,TABLE_09,Dine-in
+89,2025-10-29,67000,38500,Makanan Utama,Nasi Pecel Madiun + Wedang Uwuh + Pisang Goreng,TABLE_17,Dine-in
+90,2025-10-29,17000,9500,Dessert,Bakpia Pathok,TA_283,Takeaway
+91,2025-10-29,37500,16500,Minuman,Wedang Uwuh + Bakpia Pathok,TABLE_10,Dine-in
+92,2025-10-29,41500,24500,Makanan Utama,Sate Ayam Madura,GOF_8216,GoFood
+93,2025-10-30,20000,8000,Dessert,Klepon,TABLE_03,Dine-in
+94,2025-10-30,41500,23000,Makanan Utama,Gudeg Jogja + Teh Tawar Hangat,TABLE_14,Dine-in
+95,2025-10-30,20500,6500,Minuman,Kopi Tubruk,TA_553,Takeaway
+96,2025-10-30,173500,107000,Paket Hemat,Paket Keluarga 2-3 Orang + Getuk,TABLE_07,Dine-in
+97,2025-10-30,74500,46500,Makanan Utama,Rawon Surabaya + Es Jeruk + Pisang Goreng,GOF_5771,GoFood
+98,2025-10-30,69500,38500,Makanan Utama,Ayam Penyet + Tahu Bacem,TABLE_19,Dine-in
+99,2025-10-31,14000,6500,Camilan,Pisang Goreng,GOF_3441,GoFood
+100,2025-10-31,13000,8000,Camilan,Tempe Mendoan,GRB_6039,GrabFood
+101,2025-10-31,21000,11000,Camilan,Lumpia Semarang,TA_805,Takeaway
+102,2025-10-31,48500,31500,Makanan Utama,Ayam Penyet,TABLE_14,Dine-in
+103,2025-10-31,8500,3000,Minuman,Es Teh Manis,GOF_1339,GoFood
+104,2025-10-31,30500,12000,Minuman,Teh Tawar Hangat + Bakpia Pathok,SPF_9502,ShopeeFood
+105,2025-10-31,19500,11000,Camilan,Tahu Bacem,GOF_9056,GoFood
+106,2025-11-01,180500,104500,Paket Hemat,Paket Keluarga 2-3 Orang + Es Jeruk,SPF_7744,ShopeeFood
+107,2025-11-01,82000,48500,Makanan Utama,Tongseng Ayam + Tempe Mendoan,GOF_2899,GoFood
+108,2025-11-01,69500,38000,Makanan Utama,Gudeg Jogja + Getuk,SPF_9167,ShopeeFood
+109,2025-11-01,16500,7000,Minuman,Kopi Tubruk,GOF_5719,GoFood
+110,2025-11-01,10000,4000,Minuman,Es Jeruk,TABLE_20,Dine-in
+111,2025-11-01,24000,9000,Minuman,Teh Tawar Hangat + Klepon,GRB_4681,GrabFood
+112,2025-11-01,14000,6500,Camilan,Pisang Goreng,SPF_3522,ShopeeFood
+113,2025-11-01,9500,3500,Minuman,Teh Tawar Hangat,TABLE_16,Dine-in
+114,2025-11-01,145000,97000,Paket Hemat,Paket Keluarga 2-3 Orang,TABLE_05,Dine-in
+115,2025-11-01,49000,27500,Makanan Utama,Tongseng Ayam,GRB_5634,GrabFood
+116,2025-11-01,23000,11000,Camilan,Sate Usus,GOF_3434,GoFood
+117,2025-11-01,96000,63500,Paket Hemat,Paket Ayam Penyet + Es Jeruk,TABLE_11,Dine-in
+118,2025-11-01,21500,9500,Dessert,Bakpia Pathok,GRB_7730,GrabFood
+119,2025-11-02,18500,7000,Minuman,Es Cendol,TABLE_05,Dine-in
+120,2025-11-02,31500,17500,Makanan Utama,Bakmi Jawa,TABLE_15,Dine-in
+121,2025-11-02,30500,16000,Makanan Utama,Soto Ayam Kampung,TABLE_13,Dine-in
+122,2025-11-02,18000,11500,Camilan,Sate Usus,GOF_8994,GoFood
+123,2025-11-02,42500,28000,Makanan Utama,Rawon Surabaya,GRB_2480,GrabFood
+124,2025-11-02,72500,41500,Makanan Utama,Rawon Surabaya + Teh Tawar Hangat + Tempe Mendoan,TABLE_14,Dine-in
+125,2025-11-02,87000,55500,Paket Hemat,Paket Rawon + Es Teh + Es Cendol,TABLE_19,Dine-in
+126,2025-11-02,105500,70000,Paket Hemat,Paket Ayam Penyet + Es Jeruk + Es Teh Manis,TABLE_10,Dine-in
+127,2025-11-02,57500,41500,Makanan Utama,Sate Ayam Madura,GOF_5097,GoFood
+128,2025-11-02,66000,41500,Makanan Utama,Tongseng Ayam,TABLE_19,Dine-in
+129,2025-11-02,15000,4500,Minuman,Es Teh Manis,TABLE_09,Dine-in
+130,2025-11-02,22000,9500,Camilan,Tempe Mendoan,TABLE_10,Dine-in
+131,2025-11-02,35000,25000,Makanan Utama,Bakmi Jawa,GOF_3240,GoFood
+132,2025-11-03,17000,7000,Camilan,Tempe Mendoan,GOF_1546,GoFood
+133,2025-11-03,17500,7000,Minuman,Es Jeruk,TA_865,Takeaway
+134,2025-11-03,45500,23000,Makanan Utama,Bakmi Jawa,TABLE_16,Dine-in
+135,2025-11-03,48500,27500,Makanan Utama,Bakmi Jawa + Tahu Bacem,SPF_6992,ShopeeFood
+136,2025-11-03,65000,41500,Makanan Utama,Ayam Penyet + Jeruk Panas,TABLE_13,Dine-in
+137,2025-11-03,23000,11500,Dessert,Bakpia Pathok,GRB_1410,GrabFood
+138,2025-11-03,22000,11000,Dessert,Klepon,TA_164,Takeaway
+139,2025-11-03,102500,60000,Paket Hemat,Paket Ayam Penyet + Es Jeruk,GOF_1609,GoFood
+140,2025-11-03,70500,45000,Paket Hemat,Paket Gudeg Komplet,TABLE_15,Dine-in
+141,2025-11-03,21000,10000,Dessert,Getuk,TABLE_05,Dine-in
+142,2025-11-04,25000,10000,Minuman,Es Campur,GRB_5583,GrabFood
+143,2025-11-04,64000,36500,Makanan Utama,Sate Ayam Madura,TABLE_12,Dine-in
+144,2025-11-04,13000,5000,Dessert,Klepon,TA_294,Takeaway
+145,2025-11-04,13500,6000,Dessert,Klepon,SPF_1349,ShopeeFood
+146,2025-11-04,83500,48500,Makanan Utama,Soto Ayam Kampung + Kopi Tubruk + Tahu Bacem,TABLE_20,Dine-in
+147,2025-11-04,12000,7000,Camilan,Tahu Bacem,TABLE_06,Dine-in
+148,2025-11-04,10000,5500,Camilan,Tahu Bacem,TABLE_08,Dine-in
+149,2025-11-04,74000,49000,Makanan Utama,Ayam Penyet + Es Cendol + Tempe Mendoan,TA_470,Takeaway
+150,2025-11-05,73500,44000,Makanan Utama,Nasi Pecel Madiun + Teh Tawar Hangat + Klepon,TA_536,Takeaway
+151,2025-11-05,129500,84000,Paket Hemat,Paket Keluarga 2-3 Orang,GOF_3430,GoFood
+152,2025-11-05,40500,22000,Makanan Utama,Bakmi Jawa,TABLE_20,Dine-in
+153,2025-11-05,17000,7000,Minuman,Es Jeruk,TABLE_18,Dine-in
+154,2025-11-05,50000,29000,Makanan Utama,Sate Ayam Madura,GOF_2557,GoFood
+155,2025-11-05,44500,28000,Makanan Utama,Ayam Penyet,TABLE_03,Dine-in
+156,2025-11-05,59500,34500,Makanan Utama,Rawon Surabaya,GRB_6400,GrabFood
+157,2025-11-05,90500,67000,Makanan Utama,Tongseng Ayam + Lumpia Semarang,GOF_2697,GoFood
+158,2025-11-05,49500,28500,Makanan Utama,Sate Ayam Madura,TA_217,Takeaway
+159,2025-11-05,231000,131500,Paket Hemat,Paket Keluarga 2-3 Orang,GOF_1430,GoFood
+160,2025-11-06,6000,2500,Minuman,Teh Tawar Hangat,TA_819,Takeaway
+161,2025-11-06,14000,8500,Camilan,Lumpia Semarang,GOF_3347,GoFood
+162,2025-11-06,64500,37000,Makanan Utama,Soto Ayam Kampung + Sate Usus,TA_564,Takeaway
+163,2025-11-06,46500,31000,Makanan Utama,Bakmi Jawa,TABLE_20,Dine-in
+164,2025-11-06,63000,35500,Makanan Utama,Sate Ayam Madura,TABLE_17,Dine-in
+165,2025-11-06,104500,57000,Paket Hemat,Paket Ayam Penyet + Es Jeruk,TABLE_10,Dine-in
+166,2025-11-06,44500,27000,Makanan Utama,Gudeg Jogja + Kopi Tubruk,TABLE_04,Dine-in
+167,2025-11-06,14000,6000,Minuman,Wedang Uwuh,TABLE_08,Dine-in
+168,2025-11-06,15000,8000,Camilan,Lumpia Semarang,TA_859,Takeaway
+169,2025-11-07,84500,52000,Makanan Utama,Rawon Surabaya + Es Cendol,TABLE_10,Dine-in
+170,2025-11-07,33500,17500,Makanan Utama,Bakmi Jawa,TABLE_12,Dine-in
+171,2025-11-07,17000,9000,Camilan,Tahu Bacem,TABLE_17,Dine-in
+172,2025-11-07,17500,10500,Camilan,Lumpia Semarang,TABLE_06,Dine-in
+173,2025-11-07,17500,5500,Minuman,Kopi Tubruk,TABLE_05,Dine-in
+174,2025-11-07,30500,18500,Makanan Utama,Nasi Pecel Madiun,TABLE_06,Dine-in
+175,2025-11-07,27500,13000,Minuman,Es Campur,SPF_8354,ShopeeFood
+176,2025-11-08,17500,9000,Camilan,Sate Usus,GOF_6179,GoFood
+177,2025-11-08,55000,36500,Makanan Utama,Sate Ayam Madura,TABLE_03,Dine-in
+178,2025-11-08,101000,65500,Paket Hemat,Paket Gudeg Komplet + Bakpia Pathok,TABLE_20,Dine-in
+179,2025-11-08,84500,55500,Paket Hemat,Paket Gudeg Komplet,TA_292,Takeaway
+180,2025-11-08,64000,42500,Paket Hemat,Paket Rawon + Es Teh,TABLE_11,Dine-in
+181,2025-11-08,51500,33000,Makanan Utama,Soto Ayam Kampung + Es Campur,SPF_6962,ShopeeFood
+182,2025-11-08,78000,51500,Makanan Utama,Tongseng Ayam + Es Teh Manis,TABLE_11,Dine-in
+183,2025-11-08,8000,3000,Minuman,Teh Tawar Hangat,TABLE_20,Dine-in
+184,2025-11-08,53500,36500,Makanan Utama,Soto Ayam Kampung + Es Cendol,GRB_6072,GrabFood
+185,2025-11-08,16500,7000,Minuman,Jeruk Panas,TA_819,Takeaway
+186,2025-11-08,15500,6000,Minuman,Es Jeruk,GRB_9331,GrabFood
+187,2025-11-08,53000,27500,Makanan Utama,Soto Ayam Kampung + Es Campur,TABLE_03,Dine-in
+188,2025-11-08,13500,5000,Minuman,Es Teh Manis,TABLE_20,Dine-in
+189,2025-11-08,34000,17000,Makanan Utama,Soto Ayam Kampung,TABLE_06,Dine-in
+190,2025-11-08,50000,31500,Makanan Utama,Bakmi Jawa,GOF_8355,GoFood
+191,2025-11-09,47500,26500,Makanan Utama,Sate Ayam Madura,TABLE_15,Dine-in
+192,2025-11-09,14500,6000,Minuman,Es Cendol,GOF_3267,GoFood
+193,2025-11-09,73500,40500,Makanan Utama,Sate Ayam Madura + Sate Usus,GRB_3626,GrabFood
+194,2025-11-09,17000,8000,Camilan,Tahu Bacem,TABLE_08,Dine-in
+195,2025-11-09,37000,17000,Camilan,Tempe Mendoan + Getuk,GRB_4862,GrabFood
+196,2025-11-09,43000,28000,Makanan Utama,Nasi Pecel Madiun + Es Jeruk,TABLE_05,Dine-in
+197,2025-11-09,44000,24000,Makanan Utama,Sate Ayam Madura,TABLE_03,Dine-in
+198,2025-11-09,46000,28500,Makanan Utama,Soto Ayam Kampung,TABLE_10,Dine-in
+199,2025-11-09,60500,31500,Makanan Utama,Nasi Pecel Madiun + Klepon,TABLE_18,Dine-in
+200,2025-11-09,82500,43500,Paket Hemat,Paket Rawon + Es Teh + Es Teh Manis,TABLE_19,Dine-in
+201,2025-11-09,14500,5500,Minuman,Es Jeruk,TABLE_03,Dine-in
+202,2025-11-09,98500,63500,Paket Hemat,Paket Gudeg Komplet + Klepon,SPF_5155,ShopeeFood
+203,2025-11-09,62500,43500,Makanan Utama,Rawon Surabaya + Es Jeruk,GOF_3185,GoFood
+204,2025-11-09,90500,54500,Paket Hemat,Paket Rawon + Es Teh,TABLE_06,Dine-in
+205,2025-11-09,69000,42000,Makanan Utama,Sate Ayam Madura + Es Teh Manis + Tempe Mendoan,GRB_9444,GrabFood
+206,2025-11-10,31500,13000,Camilan,Pisang Goreng + Getuk,TABLE_10,Dine-in
+207,2025-11-10,12000,3500,Minuman,Jeruk Panas,TABLE_12,Dine-in
+208,2025-11-10,80500,55500,Makanan Utama,Sate Ayam Madura + Wedang Uwuh,TABLE_17,Dine-in
+209,2025-11-10,40500,27000,Makanan Utama,Tongseng Ayam,TABLE_10,Dine-in
+210,2025-11-10,42000,27000,Makanan Utama,Ayam Penyet,TABLE_15,Dine-in
+211,2025-11-10,48000,28000,Makanan Utama,Bakmi Jawa,TABLE_02,Dine-in
+212,2025-11-10,14000,4500,Minuman,Jeruk Panas,TABLE_06,Dine-in
+213,2025-11-11,60000,33500,Makanan Utama,Sate Ayam Madura + Kopi Tubruk,SPF_1530,ShopeeFood
+214,2025-11-11,13000,5000,Minuman,Jeruk Panas,TA_178,Takeaway
+215,2025-11-11,161000,102000,Paket Hemat,Paket Keluarga 2-3 Orang,TA_216,Takeaway
+216,2025-11-11,68000,43000,Makanan Utama,Tongseng Ayam,TABLE_15,Dine-in
+217,2025-11-12,18500,7000,Minuman,Es Campur,TABLE_03,Dine-in
+218,2025-11-12,13500,6500,Camilan,Pisang Goreng,TABLE_11,Dine-in
+219,2025-11-12,8500,3000,Minuman,Teh Tawar Hangat,GOF_3852,GoFood
+220,2025-11-12,68000,45000,Paket Hemat,Paket Gudeg Komplet,GRB_9094,GrabFood
+221,2025-11-12,90500,48500,Paket Hemat,Paket Ayam Penyet + Es Jeruk,TABLE_20,Dine-in
+222,2025-11-12,61500,32500,Makanan Utama,Tongseng Ayam,GRB_2208,GrabFood
+223,2025-11-12,49500,33000,Makanan Utama,Rawon Surabaya,TABLE_18,Dine-in
+224,2025-11-12,42000,28500,Makanan Utama,Soto Ayam Kampung,GOF_9488,GoFood
+225,2025-11-13,58000,30000,Makanan Utama,Bakmi Jawa + Teh Tawar Hangat,TABLE_18,Dine-in
+226,2025-11-13,14000,5000,Minuman,Es Jeruk,TABLE_19,Dine-in
+227,2025-11-13,71500,44500,Makanan Utama,Bakmi Jawa + Es Teh Manis + Sate Usus,SPF_7825,ShopeeFood
+228,2025-11-13,53000,31000,Makanan Utama,Ayam Penyet,TA_801,Takeaway
+229,2025-11-13,65500,38000,Paket Hemat,Paket Gudeg Komplet,TABLE_07,Dine-in
+230,2025-11-13,62000,38500,Makanan Utama,Bakmi Jawa + Lumpia Semarang,TABLE_11,Dine-in
+231,2025-11-13,61500,38500,Makanan Utama,Sate Ayam Madura + Es Teh Manis,TABLE_14,Dine-in
+232,2025-11-13,15500,6500,Camilan,Tahu Bacem,TABLE_11,Dine-in
+233,2025-11-13,67500,39000,Makanan Utama,Sate Ayam Madura,TABLE_13,Dine-in
+234,2025-11-13,21500,10000,Dessert,Bakpia Pathok,TA_151,Takeaway
+235,2025-11-13,157500,94500,Paket Hemat,Paket Keluarga 2-3 Orang,TABLE_14,Dine-in
+236,2025-11-14,41000,22000,Makanan Utama,Bakmi Jawa,TABLE_07,Dine-in
+237,2025-11-14,54500,28000,Makanan Utama,Tongseng Ayam,TABLE_20,Dine-in
+238,2025-11-14,48000,31000,Makanan Utama,Rawon Surabaya,GOF_6990,GoFood
+239,2025-11-14,63500,42500,Makanan Utama,Tongseng Ayam + Es Teh Manis,GOF_9508,GoFood
+240,2025-11-14,17500,7000,Minuman,Wedang Uwuh,TABLE_11,Dine-in
+241,2025-11-14,17000,7500,Dessert,Getuk,TABLE_17,Dine-in
+242,2025-11-14,91000,60000,Paket Hemat,Paket Ayam Penyet + Es Jeruk,GRB_2795,GrabFood
+243,2025-11-14,94000,61500,Paket Hemat,Paket Gudeg Komplet,SPF_4728,ShopeeFood
+244,2025-11-15,94500,59500,Paket Hemat,Paket Rawon + Es Teh,GOF_7229,GoFood
+245,2025-11-15,12500,5500,Minuman,Es Teh Manis,TABLE_04,Dine-in
+246,2025-11-15,140000,77000,Paket Hemat,Paket Keluarga 2-3 Orang,TABLE_17,Dine-in
+247,2025-11-15,14500,6500,Camilan,Tempe Mendoan,GOF_6325,GoFood
+248,2025-11-15,161000,88000,Paket Hemat,Paket Keluarga 2-3 Orang,SPF_9734,ShopeeFood
+249,2025-11-15,52000,33000,Makanan Utama,Ayam Penyet,TABLE_10,Dine-in
+250,2025-11-15,16500,6000,Dessert,Klepon,TABLE_16,Dine-in
+251,2025-11-15,60000,34000,Makanan Utama,Ayam Penyet + Es Cendol,TABLE_05,Dine-in
+252,2025-11-15,46500,31000,Makanan Utama,Rawon Surabaya,TABLE_07,Dine-in
+253,2025-11-15,100500,52500,Paket Hemat,Paket Ayam Penyet + Es Jeruk + Kopi Tubruk + Getuk,TABLE_08,Dine-in
+254,2025-11-15,56000,37000,Makanan Utama,Sate Ayam Madura + Sate Usus,TABLE_16,Dine-in
+255,2025-11-15,58000,32500,Makanan Utama,Ayam Penyet + Es Teh Manis,TABLE_08,Dine-in
+256,2025-11-15,15500,5000,Minuman,Es Teh Manis,TA_527,Takeaway
+257,2025-11-15,79500,54000,Makanan Utama,Gudeg Jogja + Lumpia Semarang + Getuk,GRB_2758,GrabFood
+258,2025-11-15,87000,62500,Makanan Utama,Sate Ayam Madura + Sate Usus,GRB_2845,GrabFood
+259,2025-11-16,12000,4000,Minuman,Teh Tawar Hangat,TABLE_11,Dine-in
+260,2025-11-16,71500,49000,Paket Hemat,Paket Rawon + Es Teh,GRB_7643,GrabFood
+261,2025-11-16,81500,58000,Paket Hemat,Paket Gudeg Komplet,GRB_3303,GrabFood
+262,2025-11-16,16500,8000,Camilan,Tempe Mendoan,TABLE_15,Dine-in
+263,2025-11-16,21500,11500,Dessert,Klepon,GOF_1187,GoFood
+264,2025-11-16,27000,18500,Makanan Utama,Nasi Pecel Madiun,TABLE_17,Dine-in
+265,2025-11-16,25500,15500,Camilan,Lumpia Semarang,GRB_5833,GrabFood
+266,2025-11-16,57000,37000,Makanan Utama,Soto Ayam Kampung + Jeruk Panas,TABLE_18,Dine-in
+267,2025-11-16,20000,11500,Camilan,Tahu Bacem,GRB_2341,GrabFood
+268,2025-11-16,65000,43000,Paket Hemat,Paket Ayam Penyet + Es Jeruk,TA_948,Takeaway
+269,2025-11-16,87500,52500,Paket Hemat,Paket Rawon + Es Teh + Es Campur,TA_834,Takeaway
+270,2025-11-17,38500,25500,Makanan Utama,Sate Ayam Madura,TA_159,Takeaway
+271,2025-11-17,24000,8500,Minuman,Teh Tawar Hangat + Klepon,TA_863,Takeaway
+272,2025-11-17,69000,47000,Makanan Utama,Tongseng Ayam + Bakpia Pathok,TABLE_02,Dine-in
+273,2025-11-17,49000,28500,Makanan Utama,Soto Ayam Kampung,TABLE_13,Dine-in
+274,2025-11-17,18000,7000,Camilan,Pisang Goreng,TABLE_18,Dine-in
+275,2025-11-17,15000,8500,Camilan,Tempe Mendoan,TABLE_13,Dine-in
+276,2025-11-17,12000,4000,Minuman,Kopi Tubruk,TA_405,Takeaway
+277,2025-11-17,20500,7000,Minuman,Es Cendol,TABLE_08,Dine-in
+278,2025-11-17,38000,26000,Makanan Utama,Ayam Penyet,TABLE_14,Dine-in
+279,2025-11-18,16000,8500,Camilan,Tempe Mendoan,TA_203,Takeaway
+280,2025-11-18,71000,42000,Paket Hemat,Paket Gudeg Komplet,TA_339,Takeaway
+281,2025-11-18,9000,3000,Minuman,Es Teh Manis,TA_396,Takeaway
+282,2025-11-18,17000,8000,Camilan,Sate Usus,TABLE_11,Dine-in
+283,2025-11-18,15500,8500,Camilan,Sate Usus,TABLE_09,Dine-in
+284,2025-11-18,15000,7500,Dessert,Getuk,TABLE_14,Dine-in
+285,2025-11-18,49000,32500,Makanan Utama,Bakmi Jawa,TA_526,Takeaway
+286,2025-11-18,45500,30000,Makanan Utama,Soto Ayam Kampung,TABLE_05,Dine-in
+287,2025-11-19,19000,8500,Camilan,Sate Usus,GRB_9683,GrabFood
+288,2025-11-19,36000,18500,Makanan Utama,Nasi Pecel Madiun,TABLE_03,Dine-in
+289,2025-11-19,16500,8500,Camilan,Tempe Mendoan,TA_719,Takeaway
+290,2025-11-19,19500,9500,Camilan,Tahu Bacem,TA_672,Takeaway
+291,2025-11-19,50000,34000,Makanan Utama,Bakmi Jawa + Tahu Bacem,TABLE_16,Dine-in
+292,2025-11-19,18500,7000,Minuman,Kopi Tubruk,GRB_6269,GrabFood
+293,2025-11-19,78000,44500,Makanan Utama,Bakmi Jawa + Es Campur + Pisang Goreng,GOF_7073,GoFood
+294,2025-11-19,64500,40000,Makanan Utama,Nasi Pecel Madiun + Es Cendol + Lumpia Semarang,TABLE_08,Dine-in
+295,2025-11-19,12000,4000,Minuman,Jeruk Panas,TABLE_16,Dine-in
+296,2025-11-20,22500,8000,Minuman,Es Campur,SPF_6770,ShopeeFood
+297,2025-11-20,18000,7500,Minuman,Es Campur,TABLE_18,Dine-in
+298,2025-11-20,12500,5000,Dessert,Getuk,SPF_2217,ShopeeFood
+299,2025-11-20,11500,5500,Minuman,Es Teh Manis,SPF_4791,ShopeeFood
+300,2025-11-20,61500,35500,Makanan Utama,Nasi Pecel Madiun + Sate Usus,TABLE_01,Dine-in
+301,2025-11-20,56000,36500,Paket Hemat,Paket Gudeg Komplet,TABLE_10,Dine-in
+302,2025-11-20,15000,9000,Camilan,Pisang Goreng,TABLE_04,Dine-in
+303,2025-11-20,78000,54500,Makanan Utama,Ayam Penyet + Klepon,TA_678,Takeaway
+304,2025-11-21,11500,4500,Minuman,Teh Tawar Hangat,TABLE_03,Dine-in
+305,2025-11-21,13500,6500,Camilan,Tempe Mendoan,GOF_7179,GoFood
+306,2025-11-21,75000,49000,Makanan Utama,Gudeg Jogja + Es Campur,TA_978,Takeaway
+307,2025-11-21,16000,8500,Camilan,Tempe Mendoan,SPF_8790,ShopeeFood
+308,2025-11-21,23000,13500,Camilan,Lumpia Semarang,TABLE_02,Dine-in
+309,2025-11-21,15500,6500,Camilan,Tempe Mendoan,TABLE_13,Dine-in
+310,2025-11-22,43500,27000,Makanan Utama,Nasi Pecel Madiun,GRB_6435,GrabFood
+311,2025-11-22,14000,4500,Minuman,Es Jeruk,TABLE_12,Dine-in
+312,2025-11-22,77500,42000,Paket Hemat,Paket Gudeg Komplet,TABLE_20,Dine-in
+313,2025-11-22,13000,5000,Minuman,Es Teh Manis,TABLE_15,Dine-in
+314,2025-11-22,65500,42500,Makanan Utama,Tongseng Ayam + Es Cendol,TABLE_08,Dine-in
+315,2025-11-22,40500,27000,Makanan Utama,Soto Ayam Kampung,GOF_6188,GoFood
+316,2025-11-22,46500,26500,Makanan Utama,Ayam Penyet,TABLE_06,Dine-in
+317,2025-11-22,148000,83500,Paket Hemat,Paket Keluarga 2-3 Orang + Jeruk Panas,TABLE_20,Dine-in
+318,2025-11-22,17000,10000,Camilan,Tempe Mendoan,GRB_2387,GrabFood
+319,2025-11-22,97500,67500,Paket Hemat,Paket Rawon + Es Teh,GOF_3777,GoFood
+320,2025-11-22,61000,42500,Makanan Utama,Sate Ayam Madura + Es Cendol,TABLE_03,Dine-in
+321,2025-11-22,22000,8000,Dessert,Getuk,TABLE_20,Dine-in
+597,2025-11-22,1500000,950000,Paket Hemat,Paket Catering Gudeg (50 porsi),CATER_74,Dine-in
+322,2025-11-23,32000,21500,Makanan Utama,Ayam Penyet,TABLE_11,Dine-in
+323,2025-11-23,99500,60000,Paket Hemat,Paket Rawon + Es Teh + Kopi Tubruk,TABLE_13,Dine-in
+324,2025-11-23,60000,43000,Makanan Utama,Sate Ayam Madura + Teh Tawar Hangat,SPF_4273,ShopeeFood
+325,2025-11-23,85500,52000,Paket Hemat,Paket Gudeg Komplet,TA_916,Takeaway
+326,2025-11-23,20000,9000,Minuman,Es Cendol,TABLE_10,Dine-in
+327,2025-11-23,38000,14500,Minuman,Es Cendol + Getuk,TABLE_19,Dine-in
+328,2025-11-23,207000,128500,Paket Hemat,Paket Keluarga 2-3 Orang + Jeruk Panas,TABLE_18,Dine-in
+329,2025-11-23,16000,8500,Camilan,Tempe Mendoan,TA_463,Takeaway
+330,2025-11-23,17500,6500,Minuman,Es Cendol,TABLE_14,Dine-in
+331,2025-11-23,41500,26000,Makanan Utama,Nasi Pecel Madiun,TABLE_08,Dine-in
+332,2025-11-23,39500,24500,Makanan Utama,Soto Ayam Kampung,TABLE_03,Dine-in
+333,2025-11-23,17500,9500,Dessert,Bakpia Pathok,TABLE_15,Dine-in
+334,2025-11-24,136500,80500,Paket Hemat,Paket Ayam Penyet + Es Jeruk + Es Campur + Bakpia Pathok,GRB_2885,GrabFood
+335,2025-11-24,57000,34000,Makanan Utama,Rawon Surabaya,TABLE_17,Dine-in
+336,2025-11-24,69500,39500,Makanan Utama,Tongseng Ayam,TABLE_06,Dine-in
+337,2025-11-24,68000,43000,Paket Hemat,Paket Gudeg Komplet,GOF_1072,GoFood
+338,2025-11-24,72000,53500,Makanan Utama,Rawon Surabaya + Wedang Uwuh,GOF_5298,GoFood
+339,2025-11-24,99000,66000,Paket Hemat,Paket Ayam Penyet + Es Jeruk,GOF_2871,GoFood
+340,2025-11-24,15000,7000,Camilan,Sate Usus,TABLE_10,Dine-in
+341,2025-11-24,87500,60500,Paket Hemat,Paket Rawon + Es Teh + Teh Tawar Hangat,GRB_3316,GrabFood
+342,2025-11-24,70000,37500,Makanan Utama,Soto Ayam Kampung + Sate Usus,TA_277,Takeaway
+343,2025-11-24,109500,73000,Paket Hemat,Paket Rawon + Es Teh + Es Campur + Klepon,TA_596,Takeaway
+344,2025-11-24,20500,11500,Camilan,Sate Usus,TABLE_14,Dine-in
+345,2025-11-24,81500,59500,Makanan Utama,Sate Ayam Madura + Es Teh Manis,GOF_5503,GoFood
+346,2025-11-25,84000,52500,Makanan Utama,Sate Ayam Madura + Tempe Mendoan,TABLE_12,Dine-in
+347,2025-11-25,24000,8500,Minuman,Es Campur,TA_535,Takeaway
+348,2025-11-25,15000,9000,Camilan,Tahu Bacem,TABLE_02,Dine-in
+349,2025-11-25,63000,42500,Makanan Utama,Rawon Surabaya + Tahu Bacem,TABLE_19,Dine-in
+350,2025-11-25,22500,9500,Camilan,Sate Usus,GOF_3281,GoFood
+351,2025-11-25,21500,11000,Camilan,Tempe Mendoan,GRB_5605,GrabFood
+352,2025-11-26,41500,29000,Makanan Utama,Ayam Penyet,TA_795,Takeaway
+353,2025-11-26,93500,66500,Makanan Utama,Tongseng Ayam + Teh Tawar Hangat + Tahu Bacem,GRB_6277,GrabFood
+354,2025-11-26,20000,8000,Minuman,Es Cendol,GRB_5402,GrabFood
+355,2025-11-26,56000,32500,Makanan Utama,Rawon Surabaya,GOF_5558,GoFood
+356,2025-11-27,20000,12500,Camilan,Pisang Goreng,GOF_1040,GoFood
+357,2025-11-27,19500,12500,Camilan,Tempe Mendoan,GRB_6869,GrabFood
+358,2025-11-27,15500,6500,Minuman,Es Cendol,GRB_4470,GrabFood
+359,2025-11-27,60500,41500,Makanan Utama,Ayam Penyet + Pisang Goreng,TABLE_02,Dine-in
+360,2025-11-27,15500,6500,Minuman,Es Campur,TABLE_06,Dine-in
+361,2025-11-27,44500,24500,Makanan Utama,Tongseng Ayam,TABLE_10,Dine-in
+362,2025-11-27,15500,7500,Camilan,Lumpia Semarang,TABLE_09,Dine-in
+363,2025-11-27,13000,4000,Minuman,Wedang Uwuh,TABLE_10,Dine-in
+364,2025-11-27,13500,6500,Minuman,Es Cendol,GOF_1017,GoFood
+365,2025-11-27,58000,31500,Makanan Utama,Nasi Pecel Madiun + Lumpia Semarang,TABLE_14,Dine-in
+366,2025-11-28,96000,57500,Paket Hemat,Paket Rawon + Es Teh + Es Jeruk,GOF_5902,GoFood
+367,2025-11-28,26500,10500,Minuman,Wedang Uwuh + Getuk,TABLE_20,Dine-in
+368,2025-11-28,70000,45000,Paket Hemat,Paket Rawon + Es Teh,GOF_8248,GoFood
+369,2025-11-28,39500,25500,Makanan Utama,Rawon Surabaya,GRB_8035,GrabFood
+370,2025-11-28,82000,50000,Makanan Utama,Ayam Penyet + Teh Tawar Hangat + Lumpia Semarang,TABLE_17,Dine-in
+371,2025-11-28,60500,37000,Makanan Utama,Gudeg Jogja + Pisang Goreng,TABLE_17,Dine-in
+372,2025-11-28,56500,40000,Makanan Utama,Bakmi Jawa + Es Cendol,GRB_8717,GrabFood
+373,2025-11-28,28500,9500,Minuman,Es Teh Manis + Klepon,SPF_1652,ShopeeFood
+374,2025-11-28,20500,11000,Dessert,Klepon,GRB_9209,GrabFood
+375,2025-11-28,131000,86500,Paket Hemat,Paket Keluarga 2-3 Orang,GOF_3501,GoFood
+376,2025-11-29,30000,16000,Makanan Utama,Nasi Pecel Madiun,TABLE_03,Dine-in
+377,2025-11-29,77500,40500,Paket Hemat,Paket Rawon + Es Teh + Es Cendol,TABLE_20,Dine-in
+378,2025-11-29,37500,13000,Minuman,Wedang Uwuh + Bakpia Pathok,TABLE_01,Dine-in
+379,2025-11-29,20500,9500,Dessert,Getuk,TABLE_09,Dine-in
+380,2025-11-29,72500,42000,Makanan Utama,Ayam Penyet + Klepon,TABLE_17,Dine-in
+381,2025-11-29,14000,5000,Minuman,Es Jeruk,TABLE_12,Dine-in
+382,2025-11-29,16000,9500,Camilan,Tahu Bacem,TABLE_04,Dine-in
+383,2025-11-29,12000,4500,Minuman,Es Jeruk,GRB_1042,GrabFood
+384,2025-11-29,11000,6000,Camilan,Tahu Bacem,TABLE_13,Dine-in
+385,2025-11-29,48000,29500,Makanan Utama,Gudeg Jogja,GRB_4678,GrabFood
+386,2025-11-29,37000,25000,Makanan Utama,Bakmi Jawa,TABLE_02,Dine-in
+387,2025-11-29,35000,20500,Camilan,Tempe Mendoan + Klepon,TABLE_10,Dine-in
+388,2025-11-29,90500,49000,Paket Hemat,Paket Gudeg Komplet + Teh Tawar Hangat,TABLE_12,Dine-in
+389,2025-11-29,96000,64000,Paket Hemat,Paket Rawon + Es Teh,TA_106,Takeaway
+390,2025-11-29,49000,30500,Makanan Utama,Bakmi Jawa,GRB_1023,GrabFood
+391,2025-11-29,78000,50000,Makanan Utama,Ayam Penyet + Kopi Tubruk + Bakpia Pathok,GOF_5584,GoFood
+392,2025-11-30,19000,10000,Camilan,Sate Usus,TABLE_12,Dine-in
+393,2025-11-30,14000,4500,Minuman,Es Jeruk,TABLE_13,Dine-in
+394,2025-11-30,207000,110000,Paket Hemat,Paket Keluarga 2-3 Orang,TABLE_09,Dine-in
+395,2025-11-30,23500,10500,Camilan,Pisang Goreng,GRB_6345,GrabFood
+396,2025-11-30,72500,38500,Makanan Utama,Rawon Surabaya + Es Jeruk + Pisang Goreng,TABLE_04,Dine-in
+397,2025-11-30,19500,7500,Dessert,Bakpia Pathok,TA_371,Takeaway
+398,2025-11-30,59000,38500,Makanan Utama,Ayam Penyet,GRB_6370,GrabFood
+399,2025-11-30,13000,4500,Minuman,Jeruk Panas,TABLE_10,Dine-in
+400,2025-12-01,18500,10000,Dessert,Bakpia Pathok,TABLE_18,Dine-in
+401,2025-12-01,54500,34500,Makanan Utama,Sate Ayam Madura + Tempe Mendoan,GOF_4641,GoFood
+402,2025-12-01,25000,11000,Camilan,Lumpia Semarang,TABLE_03,Dine-in
+403,2025-12-01,50000,27000,Makanan Utama,Rawon Surabaya + Pisang Goreng,TA_967,Takeaway
+404,2025-12-01,63500,34000,Makanan Utama,Gudeg Jogja + Es Cendol,GRB_7990,GrabFood
+405,2025-12-01,49500,27500,Makanan Utama,Soto Ayam Kampung + Wedang Uwuh,TABLE_10,Dine-in
+406,2025-12-01,13000,5500,Camilan,Pisang Goreng,TABLE_13,Dine-in
+407,2025-12-01,69500,36000,Makanan Utama,Nasi Pecel Madiun + Klepon,TABLE_12,Dine-in
+408,2025-12-01,17500,5500,Minuman,Jeruk Panas,TABLE_11,Dine-in
+409,2025-12-02,54000,31000,Makanan Utama,Bakmi Jawa + Teh Tawar Hangat,TABLE_12,Dine-in
+410,2025-12-02,13500,6500,Dessert,Bakpia Pathok,GOF_4951,GoFood
+411,2025-12-02,15500,6500,Camilan,Tempe Mendoan,TABLE_13,Dine-in
+412,2025-12-02,13000,7500,Camilan,Tahu Bacem,TABLE_11,Dine-in
+413,2025-12-02,14000,6000,Minuman,Es Teh Manis,GRB_3328,GrabFood
+414,2025-12-02,91500,61500,Makanan Utama,Sate Ayam Madura + Es Teh Manis + Sate Usus + Klepon,TA_439,Takeaway
+415,2025-12-03,39000,27500,Makanan Utama,Soto Ayam Kampung,GRB_6301,GrabFood
+416,2025-12-03,31500,17500,Makanan Utama,Soto Ayam Kampung,TABLE_12,Dine-in
+417,2025-12-03,13000,6000,Minuman,Es Jeruk,GOF_3235,GoFood
+418,2025-12-03,20000,7000,Minuman,Es Cendol,SPF_3854,ShopeeFood
+419,2025-12-03,74500,45500,Paket Hemat,Paket Ayam Penyet + Es Jeruk,GOF_7199,GoFood
+420,2025-12-03,15000,6000,Minuman,Wedang Uwuh,TABLE_19,Dine-in
+421,2025-12-03,12500,5500,Dessert,Getuk,TABLE_11,Dine-in
+422,2025-12-03,22500,11000,Dessert,Bakpia Pathok,GRB_9129,GrabFood
+423,2025-12-03,17500,5500,Minuman,Kopi Tubruk,TABLE_06,Dine-in
+424,2025-12-04,23000,13000,Dessert,Getuk,GOF_6500,GoFood
+425,2025-12-04,73500,44500,Makanan Utama,Nasi Pecel Madiun + Teh Tawar Hangat + Klepon,TABLE_06,Dine-in
+426,2025-12-04,166000,94500,Paket Hemat,Paket Keluarga 2-3 Orang,GRB_8855,GrabFood
+427,2025-12-04,70500,44500,Paket Hemat,Paket Rawon + Es Teh,GRB_1547,GrabFood
+428,2025-12-04,52000,29000,Makanan Utama,Rawon Surabaya + Es Cendol,TABLE_03,Dine-in
+429,2025-12-04,38000,16000,Dessert,Klepon + Getuk,TABLE_20,Dine-in
+430,2025-12-04,64500,34500,Makanan Utama,Rawon Surabaya + Kopi Tubruk,GRB_9849,GrabFood
+431,2025-12-04,64500,35000,Makanan Utama,Nasi Pecel Madiun + Es Campur + Tempe Mendoan,TABLE_20,Dine-in
+432,2025-12-04,30500,17000,Makanan Utama,Nasi Pecel Madiun,TABLE_04,Dine-in
+433,2025-12-04,67500,35500,Makanan Utama,Sate Ayam Madura + Es Cendol,TABLE_06,Dine-in
+434,2025-12-04,76500,52000,Makanan Utama,Sate Ayam Madura + Teh Tawar Hangat + Tempe Mendoan,TABLE_18,Dine-in
+435,2025-12-05,41500,16000,Minuman,Kopi Tubruk + Klepon,TABLE_14,Dine-in
+436,2025-12-05,24500,11000,Minuman,Es Campur,SPF_8803,ShopeeFood
+437,2025-12-05,46500,28000,Makanan Utama,Gudeg Jogja,TABLE_20,Dine-in
+438,2025-12-05,15000,5500,Dessert,Klepon,TABLE_06,Dine-in
+439,2025-12-05,10500,5500,Camilan,Tahu Bacem,SPF_8133,ShopeeFood
+440,2025-12-05,19500,10500,Camilan,Tahu Bacem,TABLE_03,Dine-in
+441,2025-12-05,78000,46000,Paket Hemat,Paket Ayam Penyet + Es Jeruk,TABLE_01,Dine-in
+442,2025-12-06,14000,5500,Minuman,Es Cendol,GRB_3428,GrabFood
+443,2025-12-06,62000,38000,Paket Hemat,Paket Gudeg Komplet,TA_392,Takeaway
+444,2025-12-06,16500,8500,Camilan,Pisang Goreng,GRB_8955,GrabFood
+445,2025-12-06,78000,48000,Paket Hemat,Paket Rawon + Es Teh,TA_797,Takeaway
+446,2025-12-06,87000,49500,Makanan Utama,Bakmi Jawa + Es Campur + Klepon,GOF_5593,GoFood
+447,2025-12-06,15500,7000,Camilan,Tempe Mendoan,GRB_8259,GrabFood
+448,2025-12-06,74500,41500,Makanan Utama,Tongseng Ayam + Tahu Bacem,GOF_9462,GoFood
+449,2025-12-06,25000,12000,Camilan,Sate Usus,GRB_6097,GrabFood
+450,2025-12-06,48500,34000,Makanan Utama,Gudeg Jogja + Kopi Tubruk,GOF_6904,GoFood
+451,2025-12-06,77000,49000,Makanan Utama,Sate Ayam Madura + Tempe Mendoan,GOF_8308,GoFood
+452,2025-12-06,21000,12500,Camilan,Sate Usus,TABLE_06,Dine-in
+453,2025-12-06,53500,29500,Makanan Utama,Rawon Surabaya + Es Teh Manis,GRB_4511,GrabFood
+454,2025-12-06,16500,8000,Minuman,Kopi Tubruk,GRB_9409,GrabFood
+455,2025-12-06,12000,5000,Minuman,Es Teh Manis,TABLE_06,Dine-in
+456,2025-12-07,52000,28500,Makanan Utama,Ayam Penyet,TA_758,Takeaway
+457,2025-12-07,21500,9500,Camilan,Lumpia Semarang,TABLE_15,Dine-in
+458,2025-12-07,211000,132500,Paket Hemat,Paket Keluarga 2-3 Orang + Jeruk Panas,TABLE_20,Dine-in
+459,2025-12-07,16000,7000,Minuman,Es Campur,TABLE_09,Dine-in
+460,2025-12-07,24500,13500,Camilan,Lumpia Semarang,GOF_5895,GoFood
+461,2025-12-07,63500,36000,Paket Hemat,Paket Rawon + Es Teh,TABLE_20,Dine-in
+462,2025-12-07,71500,47000,Makanan Utama,Soto Ayam Kampung + Es Campur,TABLE_13,Dine-in
+463,2025-12-07,82500,48000,Paket Hemat,Paket Rawon + Es Teh,GOF_9759,GoFood
+464,2025-12-07,114500,71500,Paket Hemat,Paket Ayam Penyet + Es Jeruk + Wedang Uwuh,GOF_2599,GoFood
+465,2025-12-07,17500,6000,Minuman,Wedang Uwuh,TABLE_08,Dine-in
+466,2025-12-07,9500,3000,Minuman,Teh Tawar Hangat,TABLE_11,Dine-in
+467,2025-12-07,246500,152500,Paket Hemat,Paket Keluarga 2-3 Orang + Es Teh Manis,TABLE_19,Dine-in
+468,2025-12-07,76500,45500,Makanan Utama,Nasi Pecel Madiun + Es Cendol + Bakpia Pathok,SPF_4281,ShopeeFood
+469,2025-12-08,14500,6500,Dessert,Klepon,TABLE_06,Dine-in
+470,2025-12-08,96000,53500,Paket Hemat,Paket Rawon + Es Teh + Klepon,GOF_3762,GoFood
+471,2025-12-08,39000,20500,Makanan Utama,Rawon Surabaya,TA_588,Takeaway
+472,2025-12-08,37000,19000,Makanan Utama,Nasi Pecel Madiun,TABLE_17,Dine-in
+473,2025-12-08,15500,7000,Minuman,Kopi Tubruk,TABLE_12,Dine-in
+474,2025-12-08,48000,27000,Makanan Utama,Ayam Penyet + Es Teh Manis,TABLE_17,Dine-in
+475,2025-12-08,39000,26000,Makanan Utama,Soto Ayam Kampung,TA_268,Takeaway
+476,2025-12-08,12500,6000,Camilan,Pisang Goreng,SPF_3149,ShopeeFood
+477,2025-12-08,48000,31500,Makanan Utama,Soto Ayam Kampung + Getuk,TABLE_18,Dine-in
+478,2025-12-09,76000,49500,Paket Hemat,Paket Gudeg Komplet + Getuk,GOF_7828,GoFood
+479,2025-12-09,64500,37500,Makanan Utama,Ayam Penyet + Tempe Mendoan,TABLE_04,Dine-in
+480,2025-12-09,55500,34500,Makanan Utama,Soto Ayam Kampung + Sate Usus,GOF_2741,GoFood
+481,2025-12-09,10500,4500,Minuman,Teh Tawar Hangat,TABLE_12,Dine-in
+482,2025-12-09,65500,47000,Makanan Utama,Gudeg Jogja + Pisang Goreng,GOF_1208,GoFood
+483,2025-12-09,23000,13500,Camilan,Sate Usus,GOF_2475,GoFood
+484,2025-12-09,84000,47000,Makanan Utama,Rawon Surabaya + Kopi Tubruk,GOF_8606,GoFood
+485,2025-12-10,17000,9500,Camilan,Tempe Mendoan,TABLE_11,Dine-in
+486,2025-12-10,30500,16000,Makanan Utama,Gudeg Jogja,TABLE_12,Dine-in
+487,2025-12-10,13500,7000,Dessert,Klepon,GRB_6615,GrabFood
+488,2025-12-10,53000,28000,Makanan Utama,Sate Ayam Madura,TABLE_14,Dine-in
+489,2025-12-10,11000,4000,Minuman,Es Jeruk,GOF_1960,GoFood
+490,2025-12-10,19000,11000,Camilan,Tempe Mendoan,SPF_8908,ShopeeFood
+491,2025-12-10,18000,7000,Minuman,Wedang Uwuh,GRB_1472,GrabFood
+492,2025-12-10,18000,9500,Camilan,Tahu Bacem,GRB_2850,GrabFood
+493,2025-12-10,92500,57500,Paket Hemat,Paket Gudeg Komplet + Getuk,GRB_4669,GrabFood
+494,2025-12-10,14500,6000,Minuman,Jeruk Panas,SPF_2560,ShopeeFood
+495,2025-12-10,20500,8500,Minuman,Es Campur,TABLE_13,Dine-in
+496,2025-12-11,33000,16500,Camilan,Sate Usus + Bakpia Pathok,TABLE_16,Dine-in
+497,2025-12-11,20000,10000,Camilan,Tempe Mendoan,GRB_6421,GrabFood
+498,2025-12-11,43000,26500,Makanan Utama,Nasi Pecel Madiun,SPF_8521,ShopeeFood
+499,2025-12-11,87500,58000,Paket Hemat,Paket Gudeg Komplet,TABLE_16,Dine-in
+500,2025-12-11,88500,57500,Makanan Utama,Tongseng Ayam + Es Teh Manis + Sate Usus,GOF_9328,GoFood
+501,2025-12-11,20500,9000,Minuman,Es Campur,TA_155,Takeaway
+502,2025-12-11,23000,13000,Camilan,Lumpia Semarang,GRB_8751,GrabFood
+503,2025-12-11,54500,31000,Makanan Utama,Sate Ayam Madura + Kopi Tubruk,GOF_5783,GoFood
+504,2025-12-11,36500,23000,Makanan Utama,Rawon Surabaya,TA_860,Takeaway
+505,2025-12-11,46500,30500,Makanan Utama,Nasi Pecel Madiun + Es Cendol,GOF_6536,GoFood
+506,2025-12-11,60500,40000,Makanan Utama,Rawon Surabaya,TABLE_17,Dine-in
+507,2025-12-11,91500,50000,Paket Hemat,Paket Gudeg Komplet,TABLE_16,Dine-in
+508,2025-12-11,21500,8000,Minuman,Wedang Uwuh,GRB_3103,GrabFood
+509,2025-12-12,14000,6000,Minuman,Jeruk Panas,TABLE_14,Dine-in
+510,2025-12-12,14500,7500,Camilan,Tahu Bacem,SPF_6617,ShopeeFood
+511,2025-12-12,69000,40000,Paket Hemat,Paket Rawon + Es Teh,SPF_9393,ShopeeFood
+512,2025-12-12,16000,5000,Minuman,Jeruk Panas,TABLE_18,Dine-in
+513,2025-12-12,69500,43500,Makanan Utama,Ayam Penyet + Wedang Uwuh,GOF_6281,GoFood
+514,2025-12-12,24500,8500,Minuman,Es Campur,GOF_7839,GoFood
+515,2025-12-12,16500,9500,Camilan,Sate Usus,GOF_7920,GoFood
+516,2025-12-12,89500,59500,Paket Hemat,Paket Gudeg Komplet + Es Teh Manis,GRB_3636,GrabFood
+517,2025-12-12,13000,5500,Minuman,Wedang Uwuh,SPF_5835,ShopeeFood
+518,2025-12-12,112500,64500,Paket Hemat,Paket Ayam Penyet + Es Jeruk + Kopi Tubruk,TABLE_08,Dine-in
+519,2025-12-12,11500,4000,Minuman,Teh Tawar Hangat,TA_490,Takeaway
+520,2025-12-12,17000,9000,Dessert,Getuk,TABLE_02,Dine-in
+521,2025-12-12,50000,31000,Makanan Utama,Sate Ayam Madura,TABLE_19,Dine-in
+522,2025-12-13,17000,6000,Minuman,Kopi Tubruk,TA_799,Takeaway
+523,2025-12-13,20500,9000,Dessert,Getuk,TABLE_02,Dine-in
+524,2025-12-13,70500,47500,Paket Hemat,Paket Rawon + Es Teh,TABLE_11,Dine-in
+525,2025-12-13,14500,6000,Camilan,Tempe Mendoan,TABLE_20,Dine-in
+526,2025-12-13,23000,12000,Camilan,Sate Usus,TABLE_19,Dine-in
+527,2025-12-13,80500,48500,Makanan Utama,Bakmi Jawa + Wedang Uwuh + Sate Usus,TA_649,Takeaway
+528,2025-12-13,80000,50000,Makanan Utama,Nasi Pecel Madiun + Jeruk Panas + Sate Usus,TABLE_18,Dine-in
+529,2025-12-13,14000,5500,Dessert,Bakpia Pathok,GRB_8301,GrabFood
+530,2025-12-13,12500,5500,Minuman,Kopi Tubruk,TABLE_11,Dine-in
+531,2025-12-13,13000,5000,Minuman,Es Jeruk,TABLE_10,Dine-in
+532,2025-12-13,93500,59000,Paket Hemat,Paket Ayam Penyet + Es Jeruk,TABLE_02,Dine-in
+533,2025-12-13,14000,6000,Minuman,Jeruk Panas,TABLE_04,Dine-in
+534,2025-12-13,36000,17500,Dessert,Getuk + Bakpia Pathok,TABLE_07,Dine-in
+535,2025-12-13,68500,40000,Paket Hemat,Paket Gudeg Komplet,GRB_8130,GrabFood
+536,2025-12-13,10500,6000,Camilan,Tahu Bacem,GOF_6434,GoFood
+537,2025-12-14,36500,25000,Makanan Utama,Soto Ayam Kampung,TABLE_09,Dine-in
+538,2025-12-14,190500,113000,Paket Hemat,Paket Keluarga 2-3 Orang + Es Cendol,TABLE_20,Dine-in
+539,2025-12-14,13500,4500,Minuman,Es Teh Manis,TABLE_12,Dine-in
+540,2025-12-14,73000,54000,Makanan Utama,Ayam Penyet + Es Campur,GRB_8765,GrabFood
+541,2025-12-14,64000,33500,Makanan Utama,Tongseng Ayam,TABLE_05,Dine-in
+542,2025-12-14,14000,8000,Camilan,Lumpia Semarang,TABLE_18,Dine-in
+543,2025-12-14,71000,48000,Makanan Utama,Tongseng Ayam + Tahu Bacem,TABLE_17,Dine-in
+544,2025-12-14,53500,32500,Makanan Utama,Ayam Penyet + Es Teh Manis,TABLE_18,Dine-in
+545,2025-12-14,115500,71000,Paket Hemat,Paket Ayam Penyet + Es Jeruk + Es Jeruk,TABLE_16,Dine-in
+546,2025-12-14,65000,39000,Makanan Utama,Nasi Pecel Madiun + Es Jeruk + Pisang Goreng,SPF_6008,ShopeeFood
+547,2025-12-14,56500,34500,Makanan Utama,Bakmi Jawa + Lumpia Semarang,GOF_8145,GoFood
+548,2025-12-14,43500,22000,Makanan Utama,Bakmi Jawa,TABLE_18,Dine-in
+549,2025-12-14,17000,6000,Minuman,Es Jeruk,TABLE_05,Dine-in
+550,2025-12-14,95500,59000,Makanan Utama,Rawon Surabaya + Es Teh Manis + Getuk,GRB_7637,GrabFood
+551,2025-12-14,74000,53000,Makanan Utama,Gudeg Jogja + Es Campur,GOF_4658,GoFood
+598,2025-12-14,1500000,950000,Paket Hemat,Paket Catering Gudeg (50 porsi),CATER_54,Dine-in
+552,2025-12-15,69000,42500,Paket Hemat,Paket Ayam Penyet + Es Jeruk,GRB_7500,GrabFood
+553,2025-12-15,45000,26500,Makanan Utama,Nasi Pecel Madiun,TABLE_06,Dine-in
+554,2025-12-15,14500,5500,Dessert,Getuk,TABLE_16,Dine-in
+555,2025-12-15,80500,49500,Makanan Utama,Sate Ayam Madura + Jeruk Panas + Tahu Bacem,GRB_6918,GrabFood
+556,2025-12-15,12500,5500,Camilan,Tempe Mendoan,TABLE_11,Dine-in
+557,2025-12-15,16500,7500,Dessert,Getuk,TABLE_09,Dine-in
+558,2025-12-15,205500,120500,Paket Hemat,Paket Keluarga 2-3 Orang,TA_955,Takeaway
+559,2025-12-15,42000,28500,Makanan Utama,Nasi Pecel Madiun,TABLE_16,Dine-in
+560,2025-12-15,56500,34500,Makanan Utama,Soto Ayam Kampung + Es Jeruk,GRB_4062,GrabFood
+561,2025-12-15,15500,6000,Minuman,Es Jeruk,TABLE_11,Dine-in
+562,2025-12-16,215500,126000,Paket Hemat,Paket Keluarga 2-3 Orang + Wedang Uwuh + Bakpia Pathok,GOF_3639,GoFood
+563,2025-12-16,84000,50500,Paket Hemat,Paket Rawon + Es Teh + Wedang Uwuh,TABLE_20,Dine-in
+564,2025-12-16,6500,2500,Minuman,Teh Tawar Hangat,SPF_8723,ShopeeFood
+565,2025-12-16,78000,53000,Makanan Utama,Tongseng Ayam + Wedang Uwuh,GRB_6614,GrabFood
+566,2025-12-16,70000,48500,Paket Hemat,Paket Gudeg Komplet,GRB_1271,GrabFood
+567,2025-12-16,23000,10000,Camilan,Sate Usus,TABLE_05,Dine-in
+568,2025-12-16,70000,35500,Makanan Utama,Gudeg Jogja + Pisang Goreng,TA_717,Takeaway
+569,2025-12-16,55000,32500,Makanan Utama,Tongseng Ayam,TA_539,Takeaway
+570,2025-12-16,17500,9000,Camilan,Pisang Goreng,TABLE_19,Dine-in
+571,2025-12-17,71000,36500,Makanan Utama,Sate Ayam Madura + Sate Usus,TABLE_07,Dine-in
+572,2025-12-17,12500,5000,Minuman,Es Teh Manis,TABLE_17,Dine-in
+573,2025-12-17,13500,5000,Minuman,Jeruk Panas,TABLE_05,Dine-in
+574,2025-12-17,95000,57500,Paket Hemat,Paket Ayam Penyet + Es Jeruk,TABLE_09,Dine-in
+575,2025-12-17,38500,24000,Makanan Utama,Nasi Pecel Madiun,SPF_8925,ShopeeFood
+576,2025-12-17,67000,41000,Makanan Utama,Bakmi Jawa + Tempe Mendoan,TABLE_06,Dine-in
+577,2025-12-17,96000,52500,Paket Hemat,Paket Ayam Penyet + Es Jeruk,TABLE_02,Dine-in
+578,2025-12-18,25000,13500,Dessert,Bakpia Pathok,TABLE_05,Dine-in
+579,2025-12-18,10500,3500,Minuman,Es Jeruk,TABLE_12,Dine-in
+580,2025-12-18,68500,38000,Makanan Utama,Tongseng Ayam,TABLE_20,Dine-in
+581,2025-12-18,20000,8000,Minuman,Wedang Uwuh,TABLE_07,Dine-in
+582,2025-12-18,16500,8500,Camilan,Sate Usus,GRB_9364,GrabFood
+583,2025-12-18,84000,44500,Makanan Utama,Soto Ayam Kampung + Kopi Tubruk + Tahu Bacem,TA_898,Takeaway
+584,2025-12-18,21500,9000,Minuman,Es Cendol,TABLE_01,Dine-in
+585,2025-12-18,66000,43000,Makanan Utama,Rawon Surabaya + Jeruk Panas,GOF_4187,GoFood
+586,2025-12-18,72500,39500,Makanan Utama,Gudeg Jogja + Es Jeruk + Lumpia Semarang,TABLE_17,Dine-in
+587,2025-12-18,16000,8000,Camilan,Sate Usus,SPF_7178,ShopeeFood
+588,2025-12-19,18000,5500,Minuman,Jeruk Panas,TA_797,Takeaway
+589,2025-12-19,99500,53500,Paket Hemat,Paket Gudeg Komplet + Es Jeruk,TABLE_08,Dine-in
+590,2025-12-19,57500,39500,Makanan Utama,Bakmi Jawa + Klepon,GOF_5706,GoFood
+591,2025-12-19,10500,4000,Minuman,Jeruk Panas,TABLE_06,Dine-in
+592,2025-12-19,38000,21000,Makanan Utama,Ayam Penyet,TABLE_16,Dine-in
+593,2025-12-19,50000,27500,Makanan Utama,Nasi Pecel Madiun + Kopi Tubruk,GOF_2747,GoFood
+594,2025-12-19,53500,34500,Makanan Utama,Sate Ayam Madura + Klepon,TABLE_20,Dine-in
+595,2025-12-19,16500,9500,Camilan,Sate Usus,TABLE_17,Dine-in
+596,2025-12-19,30000,20000,Makanan Utama,Soto Ayam Kampung,TABLE_02,Dine-in
