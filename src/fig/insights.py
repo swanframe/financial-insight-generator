@@ -26,7 +26,10 @@ def _fmt_currency(value: Optional[float]) -> str:
     """Format a numeric value as currency."""
     if value is None:
         return "N/A"
-    return f"${value:,.2f}"
+    # Single-currency mode: Indonesian Rupiah (IDR)
+    # Common display: no decimals, thousands separator "."
+    s = f"{float(value):,.0f}".replace(",", ".")
+    return f"Rp{s}"
 
 
 def _fmt_number(value: Optional[float], decimals: int = 2) -> str:

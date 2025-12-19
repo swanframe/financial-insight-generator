@@ -291,6 +291,7 @@ def build_system_prompt_for_report(language: str = "en") -> str:
     if lang == "id":
         return (
             "Anda adalah asisten analis keuangan yang membantu menjelaskan kinerja bisnis.\n"
+            "Semua nilai uang menggunakan Rupiah Indonesia (IDR) dan harus ditulis dengan format 'Rp'.\n"
             "Gunakan hanya metrik dan ringkasan yang diberikan dalam konteks. "
             "Jangan mengarang transaksi baru, tanggal yang tidak ada, atau detail pelanggan.\n"
             "Tuliskan jawaban dalam Bahasa Indonesia yang jelas, terstruktur, dan mudah dipahami "
@@ -299,6 +300,7 @@ def build_system_prompt_for_report(language: str = "en") -> str:
     # Default: English
     return (
         "You are a financial analyst assistant helping to explain business performance.\n"
+        "All monetary values are in Indonesian Rupiah (IDR) and must be shown using the 'Rp' format.\n"
         "Use only the metrics and summaries provided in the context. "
         "Do not invent new transactions, dates, or customer details.\n"
         "Write your response in clear, structured English suitable for a non-technical business manager."
