@@ -48,7 +48,7 @@ output:
 ui:
   # Language for user-facing output (CLI, reports, etc.)
   # Supported values: "en" (English), "id" (Bahasa Indonesia)
-  language: "en"
+  language: "id"
 
 llm:
   # Global toggle for LLM features. When false, FIG behaves as a pure, template-based tool.
